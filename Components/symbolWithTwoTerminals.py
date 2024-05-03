@@ -1,8 +1,15 @@
 import typing
+from enum import Enum
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QPoint, Qt
 from PyQt6.QtGui import QPainter, QPen, QBrush
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
+
+
+class Terminal(Enum):
+    none = None
+    terminal1 = 1
+    terminal2 = 2
 
 
 class SymbolWithTerminal(QGraphicsItem):
@@ -20,6 +27,9 @@ class SymbolWithTerminal(QGraphicsItem):
         self.height = 70
         self.terminalLength = 5
         self.padding = 10
+
+        # enum for terminal
+        self.terminalCLicked = Terminal.none
 
         # make symbol selectable and movable
         self.selected = False
@@ -67,6 +77,7 @@ class SymbolWithTerminal(QGraphicsItem):
         painter.drawLine(t2_a, t2_b)
 
         # draw connectors on terminals
+        # if self.terminalCLicked == Terminal.terminal1:
         painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
         painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
 
@@ -75,9 +86,40 @@ class SymbolWithTerminal(QGraphicsItem):
             painter.setPen(QPen(Qt.GlobalColor.red, 0.3, Qt.PenStyle.DashLine))
             painter.drawRect(self.boundingRect())
 
+    def mousePressEvent(self, event) -> None:
+        self.brush.setColor(Qt.GlobalColor.gray)
+        if -self.terminalLength - 3 <= event.pos().x() <= -self.terminalLength + 8 \
+                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+            self.terminalCLicked = Terminal.terminal1
+            print("terminal 1")
+        elif self.width - 3 <= event.pos().x() <= self.width + 8 \
+                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+            self.terminalCLicked = Terminal.terminal2
+            print("terminal 2")
+        else:
+            self.terminalCLicked = Terminal.none
+
+        print(self.terminalCLicked.name)
+
     def hoverEnterEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
-        print("hovered")
+        if self.terminalLength - 3 <= event.pos().x() <= self.terminalLength + 8 \
+                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+            print("terminal 1")
+        print(event.pos().x())
+
+    def hoverMoveEvent(self, event) -> None:
+        self.brush.setColor(Qt.GlobalColor.gray)
+        if -self.terminalLength - 3 <= event.pos().x() <= -self.terminalLength + 8 \
+                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+            self.terminalCLicked = Terminal.terminal1
+            print("terminal 1")
+        elif self.width - 3 <= event.pos().x() <= self.width + 8 \
+                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+            self.terminalCLicked = Terminal.terminal2
+            print("terminal 2")
+        else:
+            self.terminalCLicked = Terminal.none
 
     def hoverLeaveEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.darkRed)
