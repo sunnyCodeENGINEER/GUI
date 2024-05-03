@@ -5,11 +5,7 @@ from PyQt6.QtGui import QPainter, QPen, QBrush
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
 
-from Components.CircuitNode.circuitNode import CircuitNode
-
-
-class Symbol(QGraphicsItem):
-
+class SymbolWithTerminal(QGraphicsItem):
     class Signals(QGraphicsObject):
         # signal sends (uniqueID, terminalIndex) as arguments.
         terminalClicked = pyqtSignal(str, int)
@@ -23,10 +19,7 @@ class Symbol(QGraphicsItem):
         self.width = 90
         self.height = 70
         self.terminalLength = 5
-        self.padding = 7
-
-        # self.terminal1: CircuitNode
-        # self.terminal2: CircuitNode
+        self.padding = 10
 
         # make symbol selectable and movable
         self.selected = False
@@ -73,6 +66,10 @@ class Symbol(QGraphicsItem):
         painter.drawLine(t1_a, t1_b)
         painter.drawLine(t2_a, t2_b)
 
+        # draw connectors on terminals
+        painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
+        painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
+
         # draw selection box
         if self.isSelected():
             painter.setPen(QPen(Qt.GlobalColor.red, 0.3, Qt.PenStyle.DashLine))
@@ -92,9 +89,3 @@ class Symbol(QGraphicsItem):
             self.width + (2 * self.padding),
             self.height + (2 * self.padding),
         )
-
-    # def getTerminalPositions(self) -> Tuple[QPointF, QPointF]:
-    #     t1_pos = self.mapToScene(0, self.height // 2)
-    #     t2_pos = self.mapToScene(self.width, self.height // 2)
-    #     return t1_pos, t2_pos
-

@@ -1,70 +1,140 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout
-from PyQt6.QtGui import QPixmap, QPen, QPainter, QColor, QAction
-from PyQt6.QtCore import QSize, Qt, QPoint
+import typing
 
+from PyQt6 import QtGui
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, \
+    QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsPathItem, QGraphicsItem, QWidget
+from PyQt6.QtGui import QPixmap, QPen, QPainter, QColor, QAction, QPainterPath, QBrush
+from PyQt6.QtCore import QSize, Qt, QPoint, QPointF
+
+from Components.CircuitNode.circuitNode import CircuitNode
 from Components.symbol import Symbol
+from Components.symbolWithTwoTerminals import SymbolWithTerminal
 
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
-        self.canvas = QPixmap(QSize(400, 400))
-        self.label = QLabel()
-        self.previousPoint = None
-        self.button = QPushButton("Click Me", self)
-        self.test = Symbol()
-        self.size = 1
-        self.init_ui()
+class MovingObject(QGraphicsRectItem):
+    def __init__(self, x, y, r):
+        super(MovingObject, self).__init__(0, 0, r, r)
+        self.setPos(x, y)
+        self.rr = r
+        self.setBrush(Qt.GlobalColor.blue)
+        self.setAcceptHoverEvents(True)
 
-    def init_ui(self):
-        # set up canvas view
-        self.setFixedSize(400, 400)
-        self.setWindowTitle("Test Canvas Only")
-        self.canvas.fill(QColor(255, 255, 255))
-        self.label.setPixmap(self.canvas)
-        self.setCentralWidget(self.label)
-        self.layout = QVBoxLayout(self.label)
-        self.layout.addWidget(self.test)
-        self.draw_symbol()
+        # self.width = 70
+        # self.height = 70
+        # self.terminalLength = 5
+        self.padding = 7
 
-    def draw_symbol(self):
-        painter = QPainter(self.canvas)
+    def paint(self, painter: QtGui.QPainter, option: 'QStyleOptionGraphicsItem', widget: typing.Optional[QWidget] = ...) -> None:
         pen = QPen()
-        pen.setColor(QColor(Qt.GlobalColor.black))
-        pen.setWidth(self.size)
         painter.setPen(pen)
-        self.test.draw_border(painter, pen)
+        brush = QBrush()
+        painter.setBrush(self.brush())
 
-        self.label.setPixmap(self.canvas)
-        self.size *= 2
-        print("successful", self.size)
+        painter.drawEllipse(0, 0, self.rr, self.rr)
 
-    def draw_line(self, position):
-        painter = QPainter(self.canvas)
-        pen = QPen()
-        pen.setColor(QColor(Qt.GlobalColor.black))
-        painter.setPen(pen)
-        self.test.draw_border(painter, pen)
+    # make changes to symbol when hovered on
+    def hoverEnterEvent(self, event) -> None:
+        self.setBrush(Qt.GlobalColor.green)
+        print("hoe-ver")
 
-        if self.previousPoint:
-            painter.drawLine(self.previousPoint.x(), self.previousPoint.y(),
-                             position.x(), position.y())
-        else:
-            painter.drawPoint(position.x(), position.y())
+    def hoverLeaveEvent(self, event) -> None:
+        self.setBrush(Qt.GlobalColor.blue)
 
-        self.label.setPixmap(self.canvas)
-        self.previousPoint = position
+    # move symbol when dragged
+    def mousePressEvent(self, event) -> None:
+        pass
 
     def mouseMoveEvent(self, event) -> None:
-        print(event.pos().x())
-        self.draw_line(event.pos())
+        original_cursor_position = event.lastScenePos()
+        updated_cursor_position = event.scenePos()
 
+        original_position = self.scenePos()
+
+        updated_cursor_x = updated_cursor_position.x() - original_cursor_position.x() + original_position.x()
+        updated_cursor_y = updated_cursor_position.y() - original_cursor_position.y() + original_position.y()
+
+        self.setPos(QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event) -> None:
+        print(event.pos().x(), event.pos().y())
+
+
+class CustomPathItem(QGraphicsPathItem):
+    # possible wire implementation
+    def __init__(self, path=None, parent=None):
+        super().__init__(parent)
+        self.setAcceptHoverEvents(True)
+        self.setBrush(Qt.GlobalColor.blue)
+        self.pen().setWidth(10)
+        self.pen = QPen()
+        # self.pen.setWidth(50)
+        # self.setFlag(QGraphicsItem.ItemIsSelectable)
+        # self.setFlag(QGraphicsItem.ItemIsMovable)
+        self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsMovable)
+        self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsSelectable)
+
+        if path is None:
+            self.path = QPainterPath()
+        else:
+            self.path = path
+
+    def paint(self, painter, option, widget: typing.Optional[QWidget] = ...) -> None:
+
+        painter.setPen(self.pen)
+        # painter.setBrush(self.brush())
+        painter.drawPath(self.path)
+
+    def boundingRect(self):
+        return self.path.boundingRect()
+
+    def hoverEnterEvent(self, event) -> None:
+        self.pen.setWidth(20)
+
+    def hoverLeaveEvent(self, event) -> None:
+        self.pen.setWidth(50)
+
+    # move symbol when dragged
     def mousePressEvent(self, event) -> None:
-        self.layout.addWidget(self.test)
-        self.draw_symbol()
+        pass
+
+    def mouseMoveEvent(self, event) -> None:
+        original_cursor_position = event.lastScenePos()
+        updated_cursor_position = event.scenePos()
+
+        original_position = self.scenePos()
+
+        updated_cursor_x = updated_cursor_position.x() - original_cursor_position.x() + original_position.x()
+        updated_cursor_y = updated_cursor_position.y() - original_cursor_position.y() + original_position.y()
+
+        self.setPos(QPointF(updated_cursor_x, updated_cursor_y))
+
+    def mouseReleaseEvent(self, event) -> None:
+        print(event.pos().x(), event.pos().y())
+
+class MyGraphicsView(QGraphicsView):
+    def __init__(self):
+        super().__init__()
+
+        self.canvas = QPixmap(QSize(400, 400))
+        self.label = QLabel()
+        self.size = 2
+
+        self.scene = QGraphicsScene()
+        self.setScene(self.scene)
+        self.setSceneRect(0, 0, 1200, 1000)
+
+        self.moveObject = MovingObject(50, 50, 40)
+        self.moveObject2 = MovingObject(10, 50, 30)
+
+        self.moveObject3 = SymbolWithTerminal()
+        self.nodeTest1 = CircuitNode(0, 0, 10)
+        # self.scene.addItem(self.moveObject)
+        self.scene.addItem(self.moveObject2)
+        self.scene.addItem(self.moveObject3)
+        self.scene.addItem(self.nodeTest1)
 
 
 app = QApplication([])
-window = MainWindow()
+window = MyGraphicsView()
 window.show()
 app.exec()
