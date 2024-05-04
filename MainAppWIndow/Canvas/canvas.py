@@ -7,8 +7,11 @@ from PyQt6.QtGui import QPixmap, QPen, QPainter, QColor, QAction, QPainterPath, 
 from PyQt6.QtCore import QSize, Qt, QPoint, QPointF
 
 from Components.CircuitNode.circuitNode import CircuitNode
+from Components.Test import SymbolWithTerminalTest
 from Components.symbol import Symbol
-from Components.symbolWithTwoTerminals import SymbolWithTerminal
+from Components.symbolWithThreeTerminals import SymbolWithThreeTerminals
+from Components.symbolWithTwoTerminals import SymbolWithTwoTerminals
+from Components.symbolWithOneTerminal import SymbolWithOneTerminal
 
 
 class MovingObject(QGraphicsRectItem):
@@ -124,13 +127,14 @@ class MyGraphicsView(QGraphicsView):
         self.setSceneRect(0, 0, 1200, 1000)
 
         self.moveObject = MovingObject(50, 50, 40)
-        self.moveObject2 = MovingObject(10, 50, 30)
+        # self.moveObject2 = MovingObject(10, 50, 30)
 
-        self.moveObject3 = SymbolWithTerminal()
+        # self.moveObject3 = SymbolWithTwoTerminals()
+        self.moveObject2 = SymbolWithThreeTerminals()
         self.nodeTest1 = CircuitNode(0, 0, 10)
         # self.scene.addItem(self.moveObject)
         self.scene.addItem(self.moveObject2)
-        self.scene.addItem(self.moveObject3)
+        # self.scene.addItem(self.moveObject3)
         self.scene.addItem(self.nodeTest1)
 
 

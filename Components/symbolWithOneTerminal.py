@@ -1,7 +1,7 @@
 import typing
 from enum import Enum
 
-from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QPoint, Qt
+from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, Qt
 from PyQt6.QtGui import QPainter, QPen, QBrush
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
@@ -9,10 +9,9 @@ from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 class Terminal(Enum):
     none = None
     terminal1 = 1
-    terminal2 = 2
 
 
-class SymbolWithTerminalTest(QGraphicsItem):
+class SymbolWithOneTerminal(QGraphicsItem):
     class Signals(QGraphicsObject):
         # signal sends (uniqueID, terminalIndex) as arguments.
         terminalClicked = pyqtSignal(str, int)
@@ -54,12 +53,13 @@ class SymbolWithTerminalTest(QGraphicsItem):
         pen = QPen()
         painter.setPen(pen)
         body_w = self.width - (2 * self.terminalLength)
+        body_h = self.height - (2 * self.terminalLength)
 
         # Get the 4 corners of the rectangle in the resistor
-        point_a = QPointF(self.terminalLength, 0)
-        point_b = QPointF(self.terminalLength + body_w, 0)
-        point_c = QPointF(point_b.x(), point_b.y() + self.height)
-        point_d = QPointF(point_a.x(), point_a.y() + self.height)
+        point_a = QPointF(0, self.terminalLength + 7)
+        point_b = QPointF(self.width, self.terminalLength + 7)
+        point_c = QPointF(point_b.x(), point_b.y() + body_h)
+        point_d = QPointF(point_a.x(), point_a.y() + body_h)
 
         # Draw the edges of the rectangle in the resistor
         painter.drawLine(point_a, point_b)
@@ -67,19 +67,23 @@ class SymbolWithTerminalTest(QGraphicsItem):
         painter.drawLine(point_c, point_d)
         painter.drawLine(point_d, point_a)
 
-        t1_a = QPointF(0, self.height // 2)
-        t1_b = QPointF(self.terminalLength, self.height // 2)
-        t2_a = QPointF(self.width - self.terminalLength, self.height // 2)
-        t2_b = QPointF(self.width, self.height // 2)
+        t1_a = QPointF((self.width // 2), 7)
+        t1_b = QPointF((self.width // 2), self.terminalLength + 7)
 
-        # draw terminals from their endpoints
+        # draw terminal from its endpoint
         painter.drawLine(t1_a, t1_b)
-        painter.drawLine(t2_a, t2_b)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
-            painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
-        painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
+            brush = QPen()
+            brush.setWidth(3)
+            brush.setColor(Qt.GlobalColor.blue)
+            painter.setPen(brush)
+            painter.drawEllipse(self.width // 2 - 3, 0, 7, 7)  # terminal 1
+        else:
+            painter.drawEllipse(self.width // 2 - 3, 0, 7, 7)  # terminal 1
 
         # draw selection box
         if self.isSelected():
@@ -88,30 +92,15 @@ class SymbolWithTerminalTest(QGraphicsItem):
 
     def mousePressEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
-        if -self.terminalLength - 3 <= event.pos().x() <= -self.terminalLength + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+        if self.terminalLength - 5 <= event.pos().y() <= self.terminalLength + 8 \
+                and self.width // 2 - 3 <= event.pos().x() <= self.width + 8:
             self.terminalCLicked = Terminal.terminal1
             print("terminal 1")
-        elif self.width - 3 <= event.pos().x() <= self.width + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
-            self.terminalCLicked = Terminal.terminal2
-            print("terminal 2")
         else:
             self.terminalCLicked = Terminal.none
 
         print(self.terminalCLicked.name)
         self.update()
-
-    def mouseMoveEvent(self, event) -> None:
-        original_cursor_position = event.lastScenePos()
-        updated_cursor_position = event.scenePos()
-
-        original_position = self.scenePos()
-
-        updated_cursor_x = updated_cursor_position.x() - original_cursor_position.x() + original_position.x()
-        updated_cursor_y = updated_cursor_position.y() - original_cursor_position.y() + original_position.y()
-
-        self.setPos(QPointF(updated_cursor_x, updated_cursor_y))
 
     def hoverEnterEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
@@ -122,14 +111,10 @@ class SymbolWithTerminalTest(QGraphicsItem):
 
     def hoverMoveEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
-        if -self.terminalLength - 3 <= event.pos().x() <= -self.terminalLength + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+        if self.terminalLength - 5 <= event.pos().y() <= self.terminalLength + 5 \
+                and self.width // 2 - 8 <= event.pos().x() <= self.width // 2 + 8:
             self.terminalCLicked = Terminal.terminal1
             print("terminal 1")
-        elif self.width - 3 <= event.pos().x() <= self.width + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
-            self.terminalCLicked = Terminal.terminal2
-            print("terminal 2")
         else:
             self.terminalCLicked = Terminal.none
 

@@ -10,9 +10,10 @@ class Terminal(Enum):
     none = None
     terminal1 = 1
     terminal2 = 2
+    terminal3 = 3
 
 
-class SymbolWithTerminalTest(QGraphicsItem):
+class SymbolWithThreeTerminals(QGraphicsItem):
     class Signals(QGraphicsObject):
         # signal sends (uniqueID, terminalIndex) as arguments.
         terminalClicked = pyqtSignal(str, int)
@@ -58,8 +59,8 @@ class SymbolWithTerminalTest(QGraphicsItem):
         # Get the 4 corners of the rectangle in the resistor
         point_a = QPointF(self.terminalLength, 0)
         point_b = QPointF(self.terminalLength + body_w, 0)
-        point_c = QPointF(point_b.x(), point_b.y() + self.height)
-        point_d = QPointF(point_a.x(), point_a.y() + self.height)
+        point_c = QPointF(point_b.x(), point_b.y() + self.height - (2 * self.terminalLength))
+        point_d = QPointF(point_a.x(), point_a.y() + self.height - (2 * self.terminalLength))
 
         # Draw the edges of the rectangle in the resistor
         painter.drawLine(point_a, point_b)
@@ -71,15 +72,51 @@ class SymbolWithTerminalTest(QGraphicsItem):
         t1_b = QPointF(self.terminalLength, self.height // 2)
         t2_a = QPointF(self.width - self.terminalLength, self.height // 2)
         t2_b = QPointF(self.width, self.height // 2)
+        t3_a = QPoint(self.width // 2 - 3, self.height - (2 * self.terminalLength))
+        t3_b = QPoint(self.width // 2 - 3, self.height - (1 * self.terminalLength))
 
         # draw terminals from their endpoints
         painter.drawLine(t1_a, t1_b)
         painter.drawLine(t2_a, t2_b)
+        painter.drawLine(t3_a, t3_b)
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
+            painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
+            painter.drawEllipse(self.width // 2 - 6, self.height - self.terminalLength, 7, 7)  # terminal 3
+            brush = QPen()
+            brush.setWidth(3)
+            brush.setColor(Qt.GlobalColor.blue)
+            painter.setPen(brush)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
             painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
-        painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
+        elif self.terminalCLicked == Terminal.terminal2:
+            painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
+            painter.drawEllipse(self.width // 2 - 6, self.height - self.terminalLength, 7, 7)  # terminal 3
+            brush = QPen()
+            brush.setWidth(3)
+            brush.setColor(Qt.GlobalColor.blue)
+            painter.setPen(brush)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
+        elif self.terminalCLicked == Terminal.terminal3:
+            painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
+            painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
+            brush = QPen()
+            brush.setWidth(3)
+            brush.setColor(Qt.GlobalColor.blue)
+            painter.setPen(brush)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            painter.drawEllipse(self.width // 2 - 6, self.height - self.terminalLength, 7, 7)  # terminal 3
+        else:
+            painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
+            painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
+            painter.drawEllipse(self.width // 2 - 6, self.height - self.terminalLength, 7, 7)  # terminal 3
+
+        # painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
+        # painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
 
         # draw selection box
         if self.isSelected():
@@ -89,29 +126,22 @@ class SymbolWithTerminalTest(QGraphicsItem):
     def mousePressEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
         if -self.terminalLength - 3 <= event.pos().x() <= -self.terminalLength + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+                and self.height // 2 - 3 <= event.pos().y() <= self.height // 2 + 8:
             self.terminalCLicked = Terminal.terminal1
             print("terminal 1")
         elif self.width - 3 <= event.pos().x() <= self.width + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+                and self.height // 2 - 3 <= event.pos().y() <= self.height // 2 + 8:
             self.terminalCLicked = Terminal.terminal2
             print("terminal 2")
+        elif self.width // 2 - 3 <= event.pos().x() <= self.width // 2 + 8 \
+                and self.height - self.terminalLength - 4 <= event.pos().y() <= self.height - self.terminalLength + 8:
+            self.terminalCLicked = Terminal.terminal3
+            print("terminal 3")
         else:
             self.terminalCLicked = Terminal.none
 
-        print(self.terminalCLicked.name)
         self.update()
-
-    def mouseMoveEvent(self, event) -> None:
-        original_cursor_position = event.lastScenePos()
-        updated_cursor_position = event.scenePos()
-
-        original_position = self.scenePos()
-
-        updated_cursor_x = updated_cursor_position.x() - original_cursor_position.x() + original_position.x()
-        updated_cursor_y = updated_cursor_position.y() - original_cursor_position.y() + original_position.y()
-
-        self.setPos(QPointF(updated_cursor_x, updated_cursor_y))
+        print(self.terminalCLicked.name)
 
     def hoverEnterEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
@@ -123,11 +153,11 @@ class SymbolWithTerminalTest(QGraphicsItem):
     def hoverMoveEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
         if -self.terminalLength - 3 <= event.pos().x() <= -self.terminalLength + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+                and self.height // 2 - 3 <= event.pos().y() <= self.height // 2 + 8:
             self.terminalCLicked = Terminal.terminal1
             print("terminal 1")
         elif self.width - 3 <= event.pos().x() <= self.width + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
+                and self.height // 2 - 3 <= event.pos().y() <= self.height // 2 + 8:
             self.terminalCLicked = Terminal.terminal2
             print("terminal 2")
         else:
