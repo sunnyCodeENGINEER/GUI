@@ -1,4 +1,5 @@
 from Components.symbol import Symbol
+from Components.symbolWithTwoTerminals import SymbolWithTwoTerminals
 
 
 class Component:
@@ -18,7 +19,7 @@ class Component:
         self.componentUnit = ""
         self.terminal1To = ""
         self.terminal2To = ""
-        self.symbol = Symbol()
+        self.symbol = SymbolWithTwoTerminals()
 
     def set_value(self, value):
         self.componentValue = value
