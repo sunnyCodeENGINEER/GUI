@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QPoint, Qt
-from PyQt6.QtGui import QPainter, QPen, QBrush
+from PyQt6.QtGui import QPainter, QPen, QBrush, QImage
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
 
@@ -28,6 +28,9 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         self.height = 70
         self.terminalLength = 5
         self.padding = 10
+
+        self.image_path = "../Assets/ResistorBG.png"
+        self.image = QImage(self.image_path)
 
         # enum for terminal
         self.terminalCLicked = Terminal.none
@@ -82,6 +85,9 @@ class SymbolWithThreeTerminals(QGraphicsItem):
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        # draw image
+        scaled_image = self.image.scaled(self.width, self.height)
+        painter.drawImage(2 * self.terminalLength, 2 * self.terminalLength, scaled_image)
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
             painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
@@ -115,8 +121,7 @@ class SymbolWithThreeTerminals(QGraphicsItem):
             painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
             painter.drawEllipse(self.width // 2 - 6, self.height - self.terminalLength, 7, 7)  # terminal 3
 
-        # painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
-        # painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
+
 
         # draw selection box
         if self.isSelected():
