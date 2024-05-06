@@ -86,8 +86,8 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # draw image
-        scaled_image = self.image.scaled(self.width, self.height)
-        painter.drawImage(2 * self.terminalLength, 2 * self.terminalLength, scaled_image)
+        scaled_image = self.image.scaled(80, 80)
+        painter.drawImage(self.terminalLength, 1, scaled_image)
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
             painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
@@ -121,8 +121,6 @@ class SymbolWithThreeTerminals(QGraphicsItem):
             painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
             painter.drawEllipse(self.width // 2 - 6, self.height - self.terminalLength, 7, 7)  # terminal 3
 
-
-
         # draw selection box
         if self.isSelected():
             painter.setPen(QPen(Qt.GlobalColor.red, 0.3, Qt.PenStyle.DashLine))
@@ -138,7 +136,7 @@ class SymbolWithThreeTerminals(QGraphicsItem):
                 and self.height // 2 - 3 <= event.pos().y() <= self.height // 2 + 8:
             self.terminalCLicked = Terminal.terminal2
             print("terminal 2")
-        elif self.width // 2 - 3 <= event.pos().x() <= self.width // 2 + 8 \
+        elif self.width // 2 - 8 <= event.pos().x() <= self.width // 2 + 8 \
                 and self.height - self.terminalLength - 4 <= event.pos().y() <= self.height - self.terminalLength + 8:
             self.terminalCLicked = Terminal.terminal3
             print("terminal 3")

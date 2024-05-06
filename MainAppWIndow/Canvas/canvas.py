@@ -8,6 +8,7 @@ from PyQt6.QtCore import QSize, Qt, QPoint, QPointF
 
 from Components.CircuitNode.circuitNode import CircuitNode
 from Components.Test import SymbolWithTerminalTest
+from Components.Wire.wireComponent import WireDrawing, ConnectedLinesGroup
 from Components.symbol import Symbol
 from Components.symbolWithThreeTerminals import SymbolWithThreeTerminals
 from Components.symbolWithTwoTerminals import SymbolWithTwoTerminals
@@ -27,7 +28,8 @@ class MovingObject(QGraphicsRectItem):
         # self.terminalLength = 5
         self.padding = 7
 
-    def paint(self, painter: QtGui.QPainter, option: 'QStyleOptionGraphicsItem', widget: typing.Optional[QWidget] = ...) -> None:
+    def paint(self, painter: QtGui.QPainter, option: 'QStyleOptionGraphicsItem',
+              widget: typing.Optional[QWidget] = ...) -> None:
         pen = QPen()
         painter.setPen(pen)
         brush = QBrush()
@@ -114,6 +116,7 @@ class CustomPathItem(QGraphicsPathItem):
     def mouseReleaseEvent(self, event) -> None:
         print(event.pos().x(), event.pos().y())
 
+
 class MyGraphicsView(QGraphicsView):
     def __init__(self):
         super().__init__()
@@ -129,16 +132,24 @@ class MyGraphicsView(QGraphicsView):
         self.moveObject = MovingObject(50, 50, 40)
         # self.moveObject2 = MovingObject(10, 50, 30)
 
-        # self.moveObject3 = SymbolWithTwoTerminals()
+        self.moveObject3 = SymbolWithTwoTerminals()
         self.moveObject2 = SymbolWithThreeTerminals()
         self.nodeTest1 = CircuitNode(0, 0, 10)
-        # self.scene.addItem(self.moveObject)
+
         self.scene.addItem(self.moveObject2)
-        # self.scene.addItem(self.moveObject3)
+
         self.scene.addItem(self.nodeTest1)
 
+    # def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+    #     print(event.pos())
+    #     self.points.append(event.pos())
+    #     print(self.points)
+    #     self.wireTest.redraw()
 
-app = QApplication([])
-window = MyGraphicsView()
-window.show()
-app.exec()
+    # def mouseDoubleClickEvent(self, event: QtGui.QMouseEvent) -> None:
+    #     self.wireTest.redraw()
+
+# app = QApplication([])
+# window = MyGraphicsView()
+# window.show()
+# app.exec()
