@@ -35,23 +35,6 @@ class ComponentsPane(QtWidgets.QWidget):
         # creating a dropdown menu used to select component category
         self.componentCategory = QtWidgets.QComboBox()
         self.componentCategory.setPlaceholderText("Choose a component category")
-        # get a list of the category texts from the Component category enum that specifies the category a component
-        # belongs to
-        # categoryTexts = [category.value.capitalize() for category in ComponentCategory]
-        # categoryTexts.append("All")
-        # # sorting the categories to make sure they're in alphabetical order
-        # categoryTexts.sort()
-        # self.componentCategory.addItems(categoryTexts)
-        # # call the on component change function when the user changes the category
-        # self.componentCategory.currentTextChanged.connect(
-        #     self.onComponentCategoryChange
-        # )
-        #
-        # # add drop down menu to the layout
-        # self.layout.addWidget(self.componentCategory)
-        # self.layout.setAlignment(
-        #     self.componentCategory, QtCore.Qt.AlignmentFlag.AlignTop
-        # )
 
         # sets the initial state of the components' category to "All" to display all components from the start
         self.componentCategory.setCurrentText("All")
