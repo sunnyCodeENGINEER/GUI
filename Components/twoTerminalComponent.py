@@ -12,11 +12,11 @@ class Component:
     # self.terminal1To = ""
     # self.terminal2To = ""
 
-    def __init__(self, id, name):
-        self.componentID = id
+    def __init__(self, unique_id, name):
+        self.componentID = unique_id
         self.componentName = name
         self.componentType = ""
-        self.componentValue = ""
+        self.componentValue = 0
         self.componentUnit = ""
         self.terminal1To = ""
 
@@ -34,8 +34,8 @@ class Component:
 
 
 class TwoTerminalComponent(Component):
-    def __init__(self, id, name):
-        super(TwoTerminalComponent, self).__init__(id, name)
+    def __init__(self, unique_id, name):
+        super(TwoTerminalComponent, self).__init__(unique_id, name)
         self.terminal2To = ""
         self.symbol = SymbolWithTwoTerminals()
 
@@ -44,8 +44,8 @@ class TwoTerminalComponent(Component):
 
 
 class ThreeTerminalComponent(Component):
-    def __init__(self, id, name):
-        super(ThreeTerminalComponent, self).__init__(id, name)
+    def __init__(self, unique_id, name):
+        super(ThreeTerminalComponent, self).__init__(unique_id, name)
         self.terminal2To = ""
         self.terminal3To = ""
         self.symbol = SymbolWithThreeTerminals()
