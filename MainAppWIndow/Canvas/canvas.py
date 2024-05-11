@@ -148,7 +148,7 @@ class MyGraphicsView(QGraphicsView):
         self.signals = self.Signals()
 
     def addComponent(self):
-
+        pass
 
 # app = QApplication([])
 # window = MyGraphicsView()
