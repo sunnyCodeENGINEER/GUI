@@ -10,9 +10,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.attributesPane = None
-        self.layout = None
-        self.canvas = None
-        self.componentPane = None
+        # self.layout = None
+        # self.canvas = None
+        # self.componentPane = None
+        self.componentPane = ComponentsPane()  # component pane
+        self.canvas = MyGraphicsView()  # canvas
+        self.attributesPane = AttributesPane()
         self.init_ui()
 
     def init_ui(self):
@@ -21,9 +24,9 @@ class MainWindow(QMainWindow):
         self.setMinimumWidth(1000)
         self.setMinimumHeight(800)
 
-        self.componentPane = ComponentsPane()  # component pane
-        self.canvas = MyGraphicsView()  # canvas
-        self.attributesPane = AttributesPane()
+        # self.componentPane = ComponentsPane()  # component pane
+        # self.canvas = MyGraphicsView()  # canvas
+        # self.attributesPane = AttributesPane()
 
         self.layout = QHBoxLayout()
         self.layout.setContentsMargins(5, 5, 5, 5)
@@ -36,6 +39,12 @@ class MainWindow(QMainWindow):
         container.setLayout(self.layout)
 
         self.setCentralWidget(container)
+
+    def _connect_signals(self):
+        self.canvas.signals.componentSelected.connect(self._on_canvas_component_select)
+
+    def _on_canvas_component_select(self, component):
+        self.attributesPane.on_canvas_component_select(component)
 
 
 app = QApplication([])

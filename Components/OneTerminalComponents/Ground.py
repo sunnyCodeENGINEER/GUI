@@ -1,7 +1,7 @@
-from Components.twoTerminalComponent import Component
+from Components.allTerminalComponent import OneTerminalComponent
 
 
-class Ground(Component):
+class Ground(OneTerminalComponent):
     def __init__(self, unique_id, name):
         super(Ground, self).__init__(unique_id, name)
 

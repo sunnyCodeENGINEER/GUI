@@ -14,9 +14,9 @@ class Terminal(Enum):
 class SymbolWithOneTerminal(QGraphicsItem):
     class Signals(QGraphicsObject):
         # signal sends (uniqueID, terminalIndex) as arguments.
-        terminalClicked = pyqtSignal(str, int)
+        terminalClicked = pyqtSignal(QPointF, int)
         componentMoved = pyqtSignal()
-        componentSelected = pyqtSignal(str)
+        componentSelected = pyqtSignal()
         componentDeselected = pyqtSignal(str)
         componentDataChanged = pyqtSignal()
 
@@ -44,6 +44,9 @@ class SymbolWithOneTerminal(QGraphicsItem):
         self.setAcceptHoverEvents(True)
         self.brush = QBrush()
         self.brush.setColor(Qt.GlobalColor.darkRed)
+
+        # set signals
+        self.signals = self.Signals()
 
         painter = QPainter()
         pen = QPen()
@@ -95,28 +98,22 @@ class SymbolWithOneTerminal(QGraphicsItem):
         if self.terminalLength - 5 <= event.pos().y() <= self.terminalLength + 8 \
                 and self.width // 2 - 3 <= event.pos().x() <= self.width + 8:
             self.terminalCLicked = Terminal.terminal1
-            print("terminal 1")
+            # self.signals.terminalClicked.emit(event.pos(), 1)
+            self.terminal_click_slot(event.pos(), 1)
         else:
             self.terminalCLicked = Terminal.none
 
-        print(self.terminalCLicked.name)
+        # print(self.terminalCLicked.name)
         self.update()
 
-    def hoverEnterEvent(self, event) -> None:
-        self.brush.setColor(Qt.GlobalColor.gray)
-        if self.terminalLength - 3 <= event.pos().x() <= self.terminalLength + 8 \
-                and self.height // 2 - 3 <= event.pos().y() <= self.height + 8:
-            print("terminal 1")
-        print(event.pos().x())
+        # emit selected
+        self.component_click_slot()
 
-    def hoverMoveEvent(self, event) -> None:
-        self.brush.setColor(Qt.GlobalColor.gray)
-        if self.terminalLength - 5 <= event.pos().y() <= self.terminalLength + 5 \
-                and self.width // 2 - 8 <= event.pos().x() <= self.width // 2 + 8:
-            self.terminalCLicked = Terminal.terminal1
-            print("terminal 1")
-        else:
-            self.terminalCLicked = Terminal.none
+    def terminal_click_slot(self, terminal_position, terminal_id):
+        self.signals.terminalClicked.emit(terminal_position, terminal_id)
+
+    def component_click_slot(self):
+        self.signals.componentSelected.emit()
 
     def hoverLeaveEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.darkRed)

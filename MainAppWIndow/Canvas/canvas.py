@@ -4,7 +4,7 @@ from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, \
     QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsPathItem, QGraphicsItem, QWidget
 from PyQt6.QtGui import QPixmap, QPen, QPainter, QColor, QAction, QPainterPath, QBrush
-from PyQt6.QtCore import QSize, Qt, QPoint, QPointF
+from PyQt6.QtCore import QSize, Qt, QPoint, QPointF, QObject, pyqtSignal
 
 from Components.CircuitNode.circuitNode import CircuitNode
 from Components.Test import SymbolWithTerminalTest
@@ -13,6 +13,7 @@ from Components.symbol import Symbol
 from Components.symbolWithThreeTerminals import SymbolWithThreeTerminals
 from Components.symbolWithTwoTerminals import SymbolWithTwoTerminals
 from Components.symbolWithOneTerminal import SymbolWithOneTerminal
+from Components.allTerminalComponent import OneTerminalComponent, ThreeTerminalComponent, TwoTerminalComponent
 
 
 class MovingObject(QGraphicsRectItem):
@@ -118,6 +119,9 @@ class CustomPathItem(QGraphicsPathItem):
 
 
 class MyGraphicsView(QGraphicsView):
+    class Signals(QObject):
+        componentSelected = pyqtSignal(OneTerminalComponent)
+
     def __init__(self):
         super().__init__()
 
@@ -129,25 +133,22 @@ class MyGraphicsView(QGraphicsView):
         self.setScene(self.scene)
         self.setSceneRect(0, 0, 1200, 1000)
 
+        # will all go!
         self.moveObject = MovingObject(50, 50, 40)
         # self.moveObject2 = MovingObject(10, 50, 30)
 
         self.moveObject3 = SymbolWithTwoTerminals()
         self.moveObject2 = SymbolWithThreeTerminals()
+        self.moveObject4 = TwoTerminalComponent("Transistor001", "Transistor-1")
         self.nodeTest1 = CircuitNode(0, 0, 10)
 
-        self.scene.addItem(self.moveObject2)
+        self.scene.addItem(self.moveObject4.symbol)
 
         self.scene.addItem(self.nodeTest1)
+        self.signals = self.Signals()
 
-    # def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
-    #     print(event.pos())
-    #     self.points.append(event.pos())
-    #     print(self.points)
-    #     self.wireTest.redraw()
+    def addComponent(self):
 
-    # def mouseDoubleClickEvent(self, event: QtGui.QMouseEvent) -> None:
-    #     self.wireTest.redraw()
 
 # app = QApplication([])
 # window = MyGraphicsView()

@@ -1,4 +1,4 @@
-from Components.twoTerminalComponent import TwoTerminalComponent
+from Components.allTerminalComponent import TwoTerminalComponent
 
 
 class Capacitor(TwoTerminalComponent):
