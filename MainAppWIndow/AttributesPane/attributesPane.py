@@ -115,3 +115,8 @@ class AttributesPane(QtWidgets.QWidget):
     def on_canvas_component_select(self, component):
         self.component = component
         print("connected attribPane")
+
+    @staticmethod
+    def handle_signal(value):
+        print(f"Received signal with value: {value}")
+

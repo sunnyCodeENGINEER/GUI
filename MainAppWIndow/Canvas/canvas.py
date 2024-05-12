@@ -124,7 +124,6 @@ class MyGraphicsView(QGraphicsView):
 
     def __init__(self):
         super().__init__()
-
         self.canvas = QPixmap(QSize(400, 400))
         self.label = QLabel()
         self.size = 2
@@ -132,6 +131,9 @@ class MyGraphicsView(QGraphicsView):
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
         self.setSceneRect(0, 0, 1200, 1000)
+
+        # keep track of components on the canvas
+        self.canvasComponents = {}
 
         # will all go!
         self.moveObject = MovingObject(50, 50, 40)
@@ -147,8 +149,21 @@ class MyGraphicsView(QGraphicsView):
         self.scene.addItem(self.nodeTest1)
         self.signals = self.Signals()
 
-    def addComponent(self):
+        # OneTerminalComponent.Signals.componentSelected.connect(self.handle_signal)
+
+    def generate_component(self, component_type):
         pass
+
+    def add_component(self, unique_id, component):
+        # add component and its ID to dictionary
+        self.canvasComponents[unique_id] = component
+        self.scene.addItem(component.symbol)
+
+    @staticmethod
+    def handle_signal(value):
+        print(f"Received signal with value: {value}")
+
+
 
 # app = QApplication([])
 # window = MyGraphicsView()

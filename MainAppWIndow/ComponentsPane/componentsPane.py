@@ -66,6 +66,8 @@ class ComponentsPane(QtWidgets.QWidget):
         # using the vertical box layout as the layout of the component pane
         self.setLayout(self.layout)
 
+        self.signals = self.Signals()
+
     def init_components(self):
         button_labels = [
             "Resistor", "Voltage Source (DC)", "Ground", "Capacitor", "Inductor",
@@ -81,3 +83,6 @@ class ComponentsPane(QtWidgets.QWidget):
             component_list.addWidget(button)
 
         self.layout.addLayout(component_list)
+
+    def on_component_click(self, component):
+        self.signals.componentSelected.emit(component)  # emit component that will be added to the canvas

@@ -41,10 +41,17 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
     def _connect_signals(self):
+        # connect canvas component select to attribute pane
         self.canvas.signals.componentSelected.connect(self._on_canvas_component_select)
+
+        # connect component pane component select to canvas
+        self.componentPane.signals.componentSelected.connect(self._on_component_select)
 
     def _on_canvas_component_select(self, component):
         self.attributesPane.on_canvas_component_select(component)
+
+    def _on_component_select(self, component):
+        self.canvas.add_component(component)
 
 
 app = QApplication([])
