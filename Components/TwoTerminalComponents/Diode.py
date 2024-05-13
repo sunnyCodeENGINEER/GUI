@@ -6,5 +6,5 @@ class Diode(TwoTerminalComponent):
         super(Diode, self).__init__(unique_id, name)
 
         self.componentUnit = "kOhm"
-        self.componentName = "Diode"
-        self.componentType = "Passive"
+        # self.componentName = "Diode"
+        self.componentType = "Diode"

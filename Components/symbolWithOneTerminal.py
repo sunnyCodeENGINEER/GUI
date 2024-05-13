@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, Qt
-from PyQt6.QtGui import QPainter, QPen, QBrush
+from PyQt6.QtGui import QPainter, QPen, QBrush, QFont
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
 
@@ -20,12 +20,13 @@ class SymbolWithOneTerminal(QGraphicsItem):
         componentDeselected = pyqtSignal(str)
         componentDataChanged = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
         self.width = 90
         self.height = 70
         self.terminalLength = 5
         self.padding = 10
+        self.name = name
 
         # enum for terminal
         self.terminalCLicked = Terminal.none
@@ -78,6 +79,11 @@ class SymbolWithOneTerminal(QGraphicsItem):
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        # draw component name
+        font = QFont("Arial", 8)  # Specify font family and font size (e.g., 12 points)
+        painter.setFont(font)
+        painter.drawText(10, self.height - 3, self.name)
+
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
             brush = QPen()
@@ -117,6 +123,9 @@ class SymbolWithOneTerminal(QGraphicsItem):
 
     def hoverLeaveEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.darkRed)
+
+    def set_name(self, name):
+        self.name = name
 
     def boundingRect(self):
         return QRectF(

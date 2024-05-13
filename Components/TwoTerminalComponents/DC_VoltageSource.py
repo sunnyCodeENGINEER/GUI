@@ -6,5 +6,5 @@ class DCVoltageSource(TwoTerminalComponent):
         super(DCVoltageSource, self).__init__(unique_id, name)
 
         self.componentUnit = "V"
-        self.componentName = "DC Voltage Source"
-        self.componentType = "Active"
+        # self.componentName = "DC Voltage Source"
+        self.componentType = "Source_DC"

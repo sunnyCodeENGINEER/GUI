@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QPoint, Qt
-from PyQt6.QtGui import QPainter, QPen, QBrush
+from PyQt6.QtGui import QPainter, QPen, QBrush, QFont
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
 
@@ -21,12 +21,13 @@ class SymbolWithTwoTerminals(QGraphicsItem):
         componentDeselected = pyqtSignal(str)
         componentDataChanged = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
         self.width = 90
         self.height = 70
         self.terminalLength = 5
         self.padding = 10
+        self.name = name
 
         # enum for terminal
         self.terminalCLicked = Terminal.none
@@ -81,6 +82,11 @@ class SymbolWithTwoTerminals(QGraphicsItem):
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        # draw component name
+        font = QFont("Arial", 8)  # Specify font family and font size (e.g., 12 points)
+        painter.setFont(font)
+        painter.drawText(10, self.height - 3, self.name)
+
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
             painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
@@ -101,9 +107,6 @@ class SymbolWithTwoTerminals(QGraphicsItem):
         else:
             painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
             painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
-
-        # painter.drawEllipse(-self.terminalLength - 3, (self.height // 2) - 4, 7, 7)  # terminal 1
-        # painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
 
         # draw selection box
         if self.isSelected():
@@ -138,6 +141,9 @@ class SymbolWithTwoTerminals(QGraphicsItem):
 
     def hoverLeaveEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.darkRed)
+
+    def set_name(self, name):
+        self.name = name
 
     def boundingRect(self):
         return QRectF(

@@ -6,6 +6,6 @@ class Capacitor(TwoTerminalComponent):
         super(Capacitor, self).__init__(unique_id, name)
 
         self.componentUnit = "kOhm"
-        self.componentName = "Capacitor"
-        self.componentType = "Passive"
+        # self.componentName = "Capacitor"
+        self.componentType = "Capacitor"
         

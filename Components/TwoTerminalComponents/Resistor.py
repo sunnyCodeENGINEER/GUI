@@ -6,5 +6,5 @@ class Resistor(TwoTerminalComponent):
         super(Resistor, self).__init__(unique_id, name)
 
         self.componentUnit = "kOhm"
-        self.componentName = "Resistor"
-        self.componentType = "Passive"
+        # self.componentName = "Resistor"
+        self.componentType = "Resistor"

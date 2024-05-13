@@ -6,5 +6,5 @@ class Inductor(TwoTerminalComponent):
         super(Inductor, self).__init__(unique_id, name)
 
         self.componentUnit = "kOhm"
-        self.componentName = "Inductor"
-        self.componentType = "Passive"
+        # self.componentName = "Inductor"
+        self.componentType = "Inductor"

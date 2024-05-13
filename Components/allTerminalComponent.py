@@ -10,7 +10,7 @@ from Components.symbolWithTwoTerminals import SymbolWithTwoTerminals
 class OneTerminalComponent:
     # self.componentID = ""
     # self.componentType = ""
-    # self.componentName = ""
+    # self.component_name = ""
     # self.componentValue = ""
     # self.componentUnit = ""
     # self.terminal1To = ""
@@ -27,11 +27,11 @@ class OneTerminalComponent:
         self.componentID = unique_id
         self.componentName = name
         self.componentType = ""
-        self.componentValue = 0
+        self.componentValue = "0"
         self.componentUnit = ""
         self.terminal1To = ""
 
-        self.symbol = SymbolWithOneTerminal()
+        self.symbol = SymbolWithOneTerminal(name)
 
         # set signals
         self.signals = self.Signals()
@@ -59,11 +59,12 @@ class OneTerminalComponent:
         print("I worked")
         print(f"{self.componentID}")
 
+
 class TwoTerminalComponent(OneTerminalComponent):
     def __init__(self, unique_id, name):
         super(TwoTerminalComponent, self).__init__(unique_id, name)
         self.terminal2To = ""
-        self.symbol = SymbolWithTwoTerminals()
+        self.symbol = SymbolWithTwoTerminals(name)
 
         # self.signals.terminalClicked.connect(self.terminal_clicked())
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)
@@ -87,7 +88,7 @@ class ThreeTerminalComponent(OneTerminalComponent):
         super(ThreeTerminalComponent, self).__init__(unique_id, name)
         self.terminal2To = ""
         self.terminal3To = ""
-        self.symbol = SymbolWithThreeTerminals()
+        self.symbol = SymbolWithThreeTerminals(name)
 
         # connect signal emitted from symbol to component model
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)

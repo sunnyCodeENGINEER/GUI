@@ -139,31 +139,98 @@ class MyGraphicsView(QGraphicsView):
         self.moveObject = MovingObject(50, 50, 40)
         # self.moveObject2 = MovingObject(10, 50, 30)
 
-        self.moveObject3 = SymbolWithTwoTerminals()
-        self.moveObject2 = SymbolWithThreeTerminals()
-        self.moveObject4 = TwoTerminalComponent("Transistor001", "Transistor-1")
+        self.moveObject3 = SymbolWithTwoTerminals("name")
+        self.moveObject2 = SymbolWithThreeTerminals("name")
+        # self.moveObject4 = TwoTerminalComponent("Transistor001", "Transistor-1")
         self.nodeTest1 = CircuitNode(0, 0, 10)
 
-        self.scene.addItem(self.moveObject4.symbol)
+        # self.scene.addItem(self.moveObject4.symbol)
 
-        self.scene.addItem(self.nodeTest1)
+        # self.scene.addItem(self.nodeTest1)
+
         self.signals = self.Signals()
 
         # OneTerminalComponent.Signals.componentSelected.connect(self.handle_signal)
 
+    def _connect_signals(self, component):
+
+        # component.signals.terminalClicked.connect()  #  will be uncommented when working on wire
+        component.signals.componentSelected.connect(self.component_selected)
+
+    def component_selected(self, component_id):
+        # emit component with the selected id to attribute pane
+        self.signals.componentSelected.emit(self.canvasComponents.get(component_id))
+
     def generate_component(self, component_type):
         pass
 
-    def add_component(self, unique_id, component):
+    def add_component(self, component):
+        print("arrived here")
+        print(component.componentName)
+        # generate the unique count for the component
+        unique_count = self.generate_unique_component_count(component.componentName)
+        print(f"Unique count for {component.componentType} : {unique_count}")
+        # set ID and name
+        component.componentID = f"{component.componentType}-{unique_count}"
+        component.componentName = f"{component.componentType}-{unique_count}"
+        component.symbol.set_name(f"{component.componentType}-{unique_count}")
+        print(f"{component.componentID} : {component.componentName} : {component.componentType}")
         # add component and its ID to dictionary
-        self.canvasComponents[unique_id] = component
+        self.canvasComponents[component.componentID] = component
+        try:
+            self._connect_signals(component)
+            print("signals connected successfully")
+        except Exception as e:
+            print(f"There was a problem connecting the signals: {e}")
+        print(self.canvasComponents.keys())
         self.scene.addItem(component.symbol)
+
+    def delete_component(self, component_id):
+        component = self.canvasComponents.get(component_id)
+        # remove components symbol from canvas
+        try:
+            self.scene.removeItem(component.symbol)
+        except Exception as e:
+            print(f"there was an error removing symbol from scene: {e}")
+        # remove component from dictionary
+        _ = self.canvasComponents.pop(component_id)  # will be used when working on undo and redo
+        print(self.canvasComponents.keys())
+
+    def generate_unique_component_count(self, component_name: str) -> int:
+        """
+        Function to generate the unique component count for a component name.
+
+        Params:
+            component_name: `str` the name of the component to generate the unique count for
+
+        Returns:
+            `int` the unique count for the component name
+        """
+        print("working")
+        # get all the componentIDs available
+        existing_ids = self.canvasComponents.keys()
+        print(f"existing_ids : {existing_ids}")
+        # filter the IDs to get only the ones that start with the component name
+        print(f"component_name: {component_name}")
+        filtered_ids = list(filter(lambda x: x.startswith(component_name), existing_ids))
+        print(f"filtered_ids: {filtered_ids}")
+        # if there are no existing IDs, return 0
+        if len(filtered_ids) == 0:
+            return 1
+        # sort the IDs in ascending order
+        filtered_ids.sort()
+        # get the last ID
+        last_id = filtered_ids[-1]
+        # get the unique count from the last ID
+        unique_count = int(last_id.split("-")[-1])
+        print(f"unique_count: {unique_count}")
+        # increment the unique count by 1
+        unique_count += 1
+        return unique_count
 
     @staticmethod
     def handle_signal(value):
         print(f"Received signal with value: {value}")
-
-
 
 # app = QApplication([])
 # window = MyGraphicsView()

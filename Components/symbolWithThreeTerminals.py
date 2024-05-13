@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QPoint, Qt
-from PyQt6.QtGui import QPainter, QPen, QBrush, QImage
+from PyQt6.QtGui import QPainter, QPen, QBrush, QImage, QFont
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
 
@@ -22,12 +22,13 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         componentDeselected = pyqtSignal(str)
         componentDataChanged = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
         self.width = 90
         self.height = 70
         self.terminalLength = 5
         self.padding = 10
+        self.name = name
 
         self.image_path = "../Assets/ResistorBG.png"
         self.image = QImage(self.image_path)
@@ -91,6 +92,12 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         # draw image
         scaled_image = self.image.scaled(80, 80)
         painter.drawImage(self.terminalLength, 1, scaled_image)
+
+        # draw component name
+        font = QFont("Arial", 8)  # Specify font family and font size (e.g., 12 points)
+        painter.setFont(font)
+        painter.drawText(10, self.height - 3, self.name)
+
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
             painter.drawEllipse(self.width, (self.height // 2) - 4, 7, 7)  # terminal 2
@@ -166,6 +173,9 @@ class SymbolWithThreeTerminals(QGraphicsItem):
 
     def hoverLeaveEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.darkRed)
+
+    def set_name(self, name):
+        self.name = name
 
     def boundingRect(self):
         return QRectF(

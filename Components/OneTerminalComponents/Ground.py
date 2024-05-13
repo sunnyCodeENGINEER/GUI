@@ -6,5 +6,5 @@ class Ground(OneTerminalComponent):
         super(Ground, self).__init__(unique_id, name)
 
         self.componentUnit = None
-        self.componentType = "Passive"
+        self.componentType = "Ground"
 
