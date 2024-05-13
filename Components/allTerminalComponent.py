@@ -20,7 +20,7 @@ class OneTerminalComponent:
         terminalClicked = pyqtSignal(str, QPointF, int)
         componentMoved = pyqtSignal()
         componentSelected = pyqtSignal(str)
-        componentDeselected = pyqtSignal(str)
+        componentDeselected = pyqtSignal()
         componentDataChanged = pyqtSignal()
 
     def __init__(self, unique_id, name):
@@ -38,6 +38,7 @@ class OneTerminalComponent:
 
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)
         self.symbol.signals.componentSelected.connect(self.component_clicked)
+        self.symbol.signals.componentDeselected.connect(self.component_deselected)
 
     def set_value(self, value):
         self.componentValue = value
@@ -56,8 +57,13 @@ class OneTerminalComponent:
 
     def component_clicked(self):
         self.signals.componentSelected.emit(self.componentID)
-        print("I worked")
-        print(f"{self.componentID}")
+
+    def component_deselected(self):
+        self.signals.componentDeselected.emit()
+        self.symbol.reset_terminals()
+
+    def reset_terminal(self):
+        self.symbol.reset_terminals()
 
 
 class TwoTerminalComponent(OneTerminalComponent):
@@ -69,18 +75,23 @@ class TwoTerminalComponent(OneTerminalComponent):
         # self.signals.terminalClicked.connect(self.terminal_clicked())
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)
         self.symbol.signals.componentSelected.connect(self.component_clicked)
+        self.symbol.signals.componentDeselected.connect(self.component_deselected)
 
     def set_terminal_2_to(self, connected_to):
         self.terminal2To = connected_to
 
     def terminal_clicked(self, point, unique_id):
         self.signals.terminalClicked.emit(self.componentID, point, unique_id)
-        print("I worked")
 
     def component_clicked(self):
         self.signals.componentSelected.emit(self.componentID)
-        print("I worked")
-        print(f"{self.componentID}")
+
+    def component_deselected(self):
+        self.signals.componentDeselected.emit()
+        self.symbol.reset_terminals()
+
+    def reset_terminal(self):
+        self.symbol.reset_terminals()
 
 
 class ThreeTerminalComponent(OneTerminalComponent):
@@ -93,6 +104,7 @@ class ThreeTerminalComponent(OneTerminalComponent):
         # connect signal emitted from symbol to component model
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)
         self.symbol.signals.componentSelected.connect(self.component_clicked)
+        self.symbol.signals.componentDeselected.connect(self.component_deselected)
 
     def set_terminal_2_to(self, connected_to):
         self.terminal2To = connected_to
@@ -104,9 +116,12 @@ class ThreeTerminalComponent(OneTerminalComponent):
         # handle terminal selection on symbol
         self.signals.terminalClicked.emit(self.componentID, point, unique_id)
 
-        print(f"Received QPointF: ({point.x()}, {point.y()})\nTerminal ID: {unique_id}")
-
     def component_clicked(self):
         self.signals.componentSelected.emit(self.componentID)
-        print("I worked")
-        print(f"{self.componentID}")
+
+    def component_deselected(self):
+        self.signals.componentDeselected.emit()
+        self.symbol.reset_terminals()
+
+    def reset_terminal(self):
+        self.symbol.reset_terminals()

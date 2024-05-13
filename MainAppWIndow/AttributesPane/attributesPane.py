@@ -4,7 +4,7 @@ from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QLineEdit, QComboBox, QHBoxLayout, QGraphicsView, QGraphicsScene, \
-    QGraphicsItem, QPushButton
+    QGraphicsItem, QPushButton, QMessageBox
 from PyQt6.sip import wrappertype
 
 # from utils.components import QHLine
@@ -19,6 +19,31 @@ class AttributesPane(QtWidgets.QWidget):
         """
 
         deleteComponent = pyqtSignal(str)
+
+    class DeleteConfirmationDialog(QMessageBox):
+        def __init__(self, parent=None):
+            super().__init__(parent)
+
+            self.setIcon(QMessageBox.Icon.Warning)
+            self.setWindowTitle("Confirm Deletion")
+            self.setText("Are you sure you want to delete this item?")
+            self.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            self.setDefaultButton(QMessageBox.StandardButton.No)
+
+    def delete_item(self):
+        # Instantiate the confirmation dialog
+        confirmation_dialog = self.DeleteConfirmationDialog()
+
+        # Execute the dialog and capture the result
+        result = confirmation_dialog.exec()
+
+        # Check the result and perform delete action if confirmed
+        if result == QMessageBox.StandardButton.Yes:
+            # Perform delete operation here
+            self.on_delete()
+            print("Delete confirmed")
+        else:
+            print("Delete canceled")
 
     def __init__(self, parent=None):
         # making sure that the components' pane is not any smaller than 250px
@@ -151,22 +176,22 @@ class AttributesPane(QtWidgets.QWidget):
         cancel_button = QPushButton("Cancel")
         cancel_button.clicked.connect(self.on_cancel)
         delete_button = QPushButton("Delete")
-        delete_button.clicked.connect(self.on_delete)
+        delete_button.clicked.connect(self.delete_item)
         action_hbox = QHBoxLayout()
         action_hbox.addWidget(save_button)
         action_hbox.addWidget(cancel_button)
 
-        # Add to layout
-        preview_scene = QGraphicsView()
-        scene = QGraphicsScene()
-        preview_item = self.component.symbol
-        preview_item.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, False)
-        preview_item.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, False)
-        scene.addItem(preview_item)
-        preview_scene.setScene(scene)
-        # preview_scene.setSceneRect(10, 10, 240, 100)
-        preview_scene.setMaximumHeight(150)
-        layout.addWidget(preview_scene)
+        # # Add to layout
+        # preview_scene = QGraphicsView()
+        # scene = QGraphicsScene()
+        # preview_item = self.component.symbol
+        # preview_item.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, False)
+        # preview_item.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, False)
+        # scene.addItem(preview_item)
+        # preview_scene.setScene(scene)
+        # # preview_scene.setSceneRect(10, 10, 240, 100)
+        # preview_scene.setMaximumHeight(150)
+        # layout.addWidget(preview_scene)
         layout.addLayout(name_hbox)
         layout.addLayout(value_hbox)
         layout.addLayout(unit_hbox)
@@ -202,8 +227,16 @@ class AttributesPane(QtWidgets.QWidget):
 
     def on_canvas_component_select(self, component):
         self.component = component
-        print("connected attribPane")
-        print(self.component.componentID)
+        # print("connected attribPane")
+        # print(self.component.componentID)
+
+        # update the attribute pane
+        self.update_ui()
+
+    def on_canvas_component_deselect(self):
+        self.component = None
+        # print("connected attribPane")
+        # print(self.component.componentID)
 
         # update the attribute pane
         self.update_ui()
@@ -213,7 +246,7 @@ class AttributesPane(QtWidgets.QWidget):
         self.component.componentValue = self.value_edit.text()
         self.component.symbol.set_name(self.component_name_edit.text())
         self.component.symbol.update()
-        print(self.component.componentName)
+        # print(self.component.componentName)
 
     def on_cancel(self):
         self.component_name_edit.setText(self.component.componentName)

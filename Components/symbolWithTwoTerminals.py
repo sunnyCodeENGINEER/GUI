@@ -18,7 +18,7 @@ class SymbolWithTwoTerminals(QGraphicsItem):
         terminalClicked = pyqtSignal(QPointF, int)
         componentMoved = pyqtSignal()
         componentSelected = pyqtSignal()
-        componentDeselected = pyqtSignal(str)
+        componentDeselected = pyqtSignal()
         componentDataChanged = pyqtSignal()
 
     def __init__(self, name):
@@ -131,7 +131,7 @@ class SymbolWithTwoTerminals(QGraphicsItem):
         self.update()
 
         # emit selected
-        self.component_click_slot()
+        # self.component_click_slot()
 
     def terminal_click_slot(self, terminal_position, terminal_id):
         self.signals.terminalClicked.emit(terminal_position, terminal_id)
@@ -139,11 +139,27 @@ class SymbolWithTwoTerminals(QGraphicsItem):
     def component_click_slot(self):
         self.signals.componentSelected.emit()
 
+    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value):
+        if change == QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
+            if value:
+                self.signals.componentSelected.emit()
+            else:
+                self.signals.componentDeselected.emit()
+            self.update()
+        return super().itemChange(change, value)
+
     def hoverLeaveEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.darkRed)
 
     def set_name(self, name):
         self.name = name
+
+    def reset_terminals(self):
+        self.terminalCLicked = Terminal.none
+
+    def rotate(self):
+        new_rotation = self.rotation() + 90
+        self.setRotation(new_rotation)
 
     def boundingRect(self):
         return QRectF(

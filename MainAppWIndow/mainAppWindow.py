@@ -1,4 +1,6 @@
-from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QApplication
+from PyQt6.QtCore import QSize
+from PyQt6.QtGui import QAction, QIcon
+from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QApplication, QToolBar
 
 from MainAppWIndow.AttributesPane.attributesPane import AttributesPane
 from MainAppWIndow.Canvas.canvas import MyGraphicsView
@@ -18,6 +20,7 @@ class MainWindow(QMainWindow):
         self.canvas = MyGraphicsView()  # canvas
         self.attributesPane = AttributesPane()
         self.init_ui()
+        self._create_toolbar()
         self._connect_signals()
 
     def init_ui(self):
@@ -45,19 +48,67 @@ class MainWindow(QMainWindow):
     def _connect_signals(self):
         # connect canvas component select to attribute pane
         self.canvas.signals.componentSelected.connect(self.on_canvas_component_select)
+        self.canvas.signals.componentDeselected.connect(self.on_canvas_component_deselect)
         self.attributesPane.signals.deleteComponent.connect(self.on_component_delete)
 
         # connect component pane component select to canvas
         self.componentPane.signals.componentSelected.connect(self.on_component_select)
+        
+    def _create_toolbar(self):
+        """Create a toolbar for the main window"""
+        # creating a toolbar
+        self.toolbar = QToolBar("Main Toolbar")
+        self.toolbar.setIconSize(QSize(18, 18))
+        self.addToolBar(self.toolbar)
+
+        self._create_and_add_simulate_action()
+        self._create_and_add_wire_tool_action()
+        self._create_and_add_rotate_action()
 
     def on_canvas_component_select(self, component):
         self.attributesPane.on_canvas_component_select(component)
+
+    def on_canvas_component_deselect(self):
+        self.attributesPane.on_canvas_component_deselect()
 
     def on_component_select(self, component):
         self.canvas.add_component(component)
 
     def on_component_delete(self, unique_id):
         self.canvas.delete_component(unique_id)
+
+    def _create_and_add_simulate_action(self):
+        """Create a simulate action and add it to the toolbar"""
+        # add simulate action
+        simulate_button = QAction(
+            QIcon("../Assets/simulate-icon.png"), "Simulate", self
+        )
+        simulate_button.setStatusTip("Simulate circuit on canvas")
+        simulate_button.triggered.connect(self._create_and_add_rotate_action)
+        self.toolbar.addAction(simulate_button)
+
+    def _create_and_add_wire_tool_action(self):
+        """Create a wire tool action and add it to the toolbar"""
+        # adding wire tool action to the toolbar
+        wire_tool = QAction(QIcon("../Assets/wire-tool-icon.png"), "Wire", self)
+        wire_tool.setStatusTip("Wire")
+        wire_tool.triggered.connect(self._on_wire_tool_click)
+        wire_tool.setCheckable(True)
+        self.toolbar.addAction(wire_tool)
+
+    def _create_and_add_rotate_action(self):
+        """Create a rotate action and add it to the toolbar"""
+        # add rotate action to toolbar
+        rotate_action = QAction(QIcon("../Assets/rotate-icon.png"), "Rotate", self)
+        rotate_action.triggered.connect(self.rotate_selected_component)
+        self.toolbar.addAction(rotate_action)
+
+    def _on_wire_tool_click(self, state: bool):
+        self.canvas.on_wire_tool_click(state)
+
+    def rotate_selected_component(self):
+        self.canvas.rotate_selected_components()
+
 
 
 app = QApplication([])

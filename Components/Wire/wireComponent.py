@@ -12,7 +12,7 @@ class Wire:
         self.wireColour = Qt.GlobalColor.darkGreen
         self.start = None  # where wire starts from
         self.end = None  # where wire ends
-        self.nodes = []
+        self.connectedComponents = []
 
 
 class WireDrawing(QGraphicsItem):
@@ -20,8 +20,8 @@ class WireDrawing(QGraphicsItem):
         super(WireDrawing, self).__init__()
         self.points = points
 
-        self.width = 90
-        self.height = 70
+        self.width = 20
+        self.height = 100
         self.terminalLength = 5
         self.padding = 10
 
@@ -31,7 +31,7 @@ class WireDrawing(QGraphicsItem):
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
 
         # item can be dragged
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
 
         # item can be highlighted
         self.hoveredTerminal = None
@@ -43,7 +43,7 @@ class WireDrawing(QGraphicsItem):
         # painter = QPainter()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         pen = QPen(Qt.GlobalColor.darkGreen)
-        pen.setWidth(2)
+        pen.setWidth(20)
         painter.setPen(pen)
 
         if len(self.points) >= 2:
@@ -73,8 +73,8 @@ class WireDrawing(QGraphicsItem):
 
     def boundingRect(self):
         return QRectF(
-            -self.padding,
-            -self.padding,
+            -0.5 * self.padding,
+            -0.5 * self.padding,
             self.width + (2 * self.padding),
             self.height + (2 * self.padding),
         )
