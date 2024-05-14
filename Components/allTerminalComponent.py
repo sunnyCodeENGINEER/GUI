@@ -84,6 +84,8 @@ class TwoTerminalComponent(OneTerminalComponent):
         self.signals.terminalClicked.emit(self.componentID, point, unique_id)
 
     def component_clicked(self):
+        print(f"\n\nterminal 1 to : {self.terminal1To}")
+        print(f"terminal 2 to : {self.terminal2To}")
         self.signals.componentSelected.emit(self.componentID)
 
     def component_deselected(self):
