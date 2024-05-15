@@ -49,7 +49,10 @@ class MainWindow(QMainWindow):
         # connect canvas component select to attribute pane
         self.canvas.signals.componentSelected.connect(self.on_canvas_component_select)
         self.canvas.signals.componentDeselected.connect(self.on_canvas_component_deselect)
+        self.canvas.signals.wireSelected.connect(self.on_canvas_wire_select)
+        self.canvas.signals.wireDeselected.connect(self.on_canvas_wire_deselect)
         self.attributesPane.signals.deleteComponent.connect(self.on_component_delete)
+        self.attributesPane.signals.deleteWire.connect(self.on_wire_delete)
 
         # connect component pane component select to canvas
         self.componentPane.signals.componentSelected.connect(self.on_component_select)
@@ -71,11 +74,23 @@ class MainWindow(QMainWindow):
     def on_canvas_component_deselect(self):
         self.attributesPane.on_canvas_component_deselect()
 
+    def on_canvas_wire_select(self, wire):
+        self.attributesPane.on_canvas_wire_select(wire)
+        # print("Thesis Maame")
+
+    def on_canvas_wire_deselect(self):
+        self.attributesPane.on_canvas_wire_deselect()
+        # print("Thesis Papa")
+
     def on_component_select(self, component):
         self.canvas.add_component(component)
 
     def on_component_delete(self, unique_id):
         self.canvas.delete_component(unique_id)
+
+    def on_wire_delete(self, unique_id):
+        self.canvas.delete_wire(unique_id)
+        # print("about to delete wire")
 
     def _create_and_add_simulate_action(self):
         """Create a simulate action and add it to the toolbar"""

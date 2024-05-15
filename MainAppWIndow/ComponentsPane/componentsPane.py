@@ -8,6 +8,7 @@ from PyQt6.sip import wrappertype
 
 # from utils.components import QHLine
 from Components.OneTerminalComponents.Ground import Ground
+from Components.ThreeTerminalComponents.TestTransistor import TestTransistor
 from Components.TwoTerminalComponents.AC_VoltageSource import ACVoltageSource
 from Components.TwoTerminalComponents.Capacitor import Capacitor
 from Components.TwoTerminalComponents.DC_VoltageSource import DCVoltageSource
@@ -205,7 +206,8 @@ class ComponentsPane(QtWidgets.QWidget):
 
     def init_components(self):
         button_labels = [
-            "Resistor", "Voltage Source (DC)", "Ground", "Capacitor", "Inductor", "Voltage Source (AC)"
+            "Resistor", "Voltage Source (DC)", "Ground", "Capacitor", "Inductor", "Voltage Source (AC)",\
+            "Test Transistor"
         ]
         button_labels.sort()
 
@@ -246,5 +248,7 @@ class ComponentsPane(QtWidgets.QWidget):
             component = Inductor("Inductor-", "Inductor-")
         elif component_type == "Voltage Source (AC)":
             component = ACVoltageSource("Source_AC-", "Source_AC-")
+        elif component_type == "Test Transistor":
+            component = TestTransistor("test_transist-", "test_transist-")
         return component
 

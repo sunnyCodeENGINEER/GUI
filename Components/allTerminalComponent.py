@@ -18,7 +18,7 @@ class OneTerminalComponent:
 
     class Signals(QGraphicsObject):
         terminalClicked = pyqtSignal(str, QPointF, int)
-        componentMoved = pyqtSignal()
+        componentMoved = pyqtSignal(QPointF)
         componentSelected = pyqtSignal(str)
         componentDeselected = pyqtSignal()
         componentDataChanged = pyqtSignal()
@@ -39,6 +39,7 @@ class OneTerminalComponent:
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)
         self.symbol.signals.componentSelected.connect(self.component_clicked)
         self.symbol.signals.componentDeselected.connect(self.component_deselected)
+        self.symbol.signals.componentMoved.connect(self.component_moved)
 
     def set_value(self, value):
         self.componentValue = value
@@ -56,11 +57,16 @@ class OneTerminalComponent:
         print(f"Received QPointF: ({point.x()}, {point.y()})\nTerminal ID: {unique_id}")
 
     def component_clicked(self):
+        print("\n\tclicked")
+        print(self.terminal1To)
         self.signals.componentSelected.emit(self.componentID)
 
     def component_deselected(self):
         self.signals.componentDeselected.emit()
         self.symbol.reset_terminals()
+
+    def component_moved(self, offset):
+        self.signals.componentMoved.emit(offset)
 
     def reset_terminal(self):
         self.symbol.reset_terminals()
@@ -76,6 +82,7 @@ class TwoTerminalComponent(OneTerminalComponent):
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)
         self.symbol.signals.componentSelected.connect(self.component_clicked)
         self.symbol.signals.componentDeselected.connect(self.component_deselected)
+        self.symbol.signals.componentMoved.connect(self.component_moved)
 
     def set_terminal_2_to(self, connected_to):
         self.terminal2To = connected_to
@@ -92,6 +99,9 @@ class TwoTerminalComponent(OneTerminalComponent):
         self.signals.componentDeselected.emit()
         self.symbol.reset_terminals()
 
+    def component_moved(self, offset):
+        self.signals.componentMoved.emit(offset)
+
     def reset_terminal(self):
         self.symbol.reset_terminals()
 
@@ -107,6 +117,7 @@ class ThreeTerminalComponent(OneTerminalComponent):
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)
         self.symbol.signals.componentSelected.connect(self.component_clicked)
         self.symbol.signals.componentDeselected.connect(self.component_deselected)
+        self.symbol.signals.componentMoved.connect(self.component_moved)
 
     def set_terminal_2_to(self, connected_to):
         self.terminal2To = connected_to
@@ -124,6 +135,9 @@ class ThreeTerminalComponent(OneTerminalComponent):
     def component_deselected(self):
         self.signals.componentDeselected.emit()
         self.symbol.reset_terminals()
+
+    def component_moved(self, offset):
+        self.signals.componentMoved.emit(offset)
 
     def reset_terminal(self):
         self.symbol.reset_terminals()

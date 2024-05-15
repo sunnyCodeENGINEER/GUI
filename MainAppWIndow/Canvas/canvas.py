@@ -174,10 +174,15 @@ class MyGraphicsView(QGraphicsView):
         component.signals.terminalClicked.connect(self.terminal_clicked)  # will be uncommented when working on wire
         component.signals.componentSelected.connect(self.component_selected)
         component.signals.componentDeselected.connect(self.component_deselected)
+        component.signals.componentMoved.connect(self.component_moved)
 
     def _connect_wire_signals(self, wire):
-        wire.signal.wireSelected.connect(self.wire_selected)
-        wire.signal.wireDeselected.connect(self.wire_deselected)
+        wire.signals.wireSelected.connect(self.wire_selected)
+        wire.signals.wireDeselected.connect(self.wire_deselected)
+
+    def component_moved(self, offset):
+        print(offset)
+        self.redraw_wire_on_wire_move()
 
     def component_selected(self, component_id):
         # emit component with the selected id to attribute pane
@@ -196,16 +201,18 @@ class MyGraphicsView(QGraphicsView):
     def wire_selected(self, wire_id):
         # emit component with the selected id to attribute pane
         self.signals.wireSelected.emit(self.wires.get(wire_id))
-        print("Thesis Maame")
+        # print("Thesis Maame")
         # self.selectedComponent = self.canvasComponents.get(component_id)
 
     def wire_deselected(self):
         # emit component with the selected id to attribute pane
         self.signals.wireDeselected.emit()
+        # print("Thesis Papa")
 
         # self.selectedComponent = None
 
     def terminal_clicked(self, component_id, point, terminal_id):
+        print(f"checking point=: {point}")
         # check if wire tool is active
         if self.wireToolActive:
             # append component ID and Terminal ID to clickedTerminals
@@ -220,6 +227,7 @@ class MyGraphicsView(QGraphicsView):
                 self.wirePoints = []
                 # bring pop up for wire name and set up wire
                 self.currentWire = Wire()
+                print("-------------------------------")
                 unique_count = self.generate_unique_wire_count()
                 # self.currentWire.wireID = f"wire-{len(self.wires) + 1}"
                 self.currentWire.wireID = f"wire-{unique_count}"
@@ -256,25 +264,31 @@ class MyGraphicsView(QGraphicsView):
                     self.wirePoints.append(component.symbol.scenePos() + self.terminalPoint[index])
                     self.terminalPointIndex += 1
                     if terminal_id == 1:
-                        component.terminal1to = self.currentWire.wireID
-                        # print(component.terminal1to)
+                        component.terminal1To = self.currentWire.wireID
+                        print(f"verifying...............{component.terminal1To}")
                     elif terminal_id == 2:
-                        component.terminal2to = self.currentWire.wireID
+                        component.terminal2To = self.currentWire.wireID
                         # print(component.terminal2to)
+                        print(f"verifying...............{component.terminal2To}")
                     elif terminal_id == 3:
-                        component.terminal3to = self.currentWire.wireID
+                        component.terminal3To = self.currentWire.wireID
                         # print(component.terminal3to)
+                        print(f"verifying...............{component.terminal3To}")
                     # reset component terminal selected to none
                     component.reset_terminal()
+                    self.canvasComponents[component_id] = component
+                    # print(f"also verifying.............{self.canvasComponents[component_id].terminal2To}")
 
                 # clear self.clickedTerminals
                 self.clickedTerminals.clear()
                 self.currentWire.uiWire = WireDrawing(self.wirePoints)
+                self.currentWire.points = self.wirePoints
                 # add wire to self.wires
                 self.wires[self.currentWire.wireID] = self.currentWire
                 print(self.wires)
 
-                self.scene.addItem(self.currentWire.uiWire)
+                # self.scene.addItem(self.currentWire.uiWire)
+                self.scene.addItem(self.currentWire)
                 # self.draw_wire()
                 self.terminalPoint = []
 
@@ -295,14 +309,131 @@ class MyGraphicsView(QGraphicsView):
         else:
             return None
 
+    def redraw_wire_on_wire_move(self, offset):
+        print("here")
+        # return
+        wires_to_redraw = []
+        print(self.selectedComponent)
+        print(self.selectedComponent.terminal1To)
+        try:
+            wire_id = self.selectedComponent.terminal1To
+            print(wire_id)
+            wire = self.wires.get(wire_id)
+            print(wire)
+            # store points
+            points = []
+            for point in wire.points:
+                if point.x() - 10 <= self.selectedComponent.symbol.original_position.x() +\
+                        self.selectedComponent.symbol.scenePos().x() <= point.x() + 10 \
+                        and point.y() - 10 <= self.selectedComponent.symbol.original_position.y() +\
+                        self.selectedComponent.symbol.scenePos().y() <= point.y() + 10:
+                    # point = self.selectedComponent.symbol.final_position
+                    point += offset
+                    # points.append(point)
+                    print(point)
+                    print(points)
+                    print("should redraw")
+                else:
+                    print("=======================")
+                    print(point)
+                    print(self.selectedComponent.symbol.old_terminal1_position)
+                    print(self.selectedComponent.symbol.scenePos())
+                    print("=======================")
+                points.append(point)
+                print(point)
+                print(points)
+            wire.points = points
+            wire.update()
+            self.scene.update()
+            # wires_to_redraw.append(wire_id)
+        except Exception as e:
+            print(f"no terminal: {e}")
+        try:
+            wire_id = self.selectedComponent.terminal2To
+            wires_to_redraw.append(wire_id)
+        except Exception as e:
+            print(f"no terminal: {e}")
+        try:
+            wire_id = self.selectedComponent.terminal3To
+            wires_to_redraw.append(wire_id)
+        except Exception as e:
+            print(f"no terminal: {e}")
+        # for wire_id in wires_to_redraw:
+        #     wire = self.wires.get(wire_id)
+        #     for point in wire.points:
+        #         if point == self.selectedComponent.symbol.old_terminal1_position:
+        #             point = self.selectedComponent.symbol.new_terminal1_position
+
+    def redraw_wire_on_wire_rotation(self):
+        print("here")
+        # return
+        wires_to_redraw = []
+        print(self.selectedComponent)
+        print(self.selectedComponent.terminal1To)
+        try:
+            wire_id = self.selectedComponent.terminal1To
+            print(wire_id)
+            wire = self.wires.get(wire_id)
+            print(wire)
+            # store points
+            points = []
+            for point in wire.points:
+                # if point == self.selectedComponent.symbol.old_terminal1_position:
+                #     point = self.selectedComponent.symbol.new_terminal1_position
+                if point.x() - 10 <= self.selectedComponent.symbol.old_terminal1_position.x() +\
+                        self.selectedComponent.symbol.scenePos().x() <= point.x() + 10 \
+                        and point.y() - 10 <= self.selectedComponent.symbol.old_terminal1_position.y() +\
+                        self.selectedComponent.symbol.scenePos().y() <= point.y() + 10:
+                    point = self.selectedComponent.symbol.new_terminal1_position + \
+                            self.selectedComponent.symbol.scenePos()
+                    # points.append(point)
+                    print(point)
+                    print(points)
+                    print("should redraw")
+                else:
+                    print("=======================")
+                    print(point)
+                    print(self.selectedComponent.symbol.old_terminal1_position)
+                    print(self.selectedComponent.symbol.scenePos())
+                    print("=======================")
+                points.append(point)
+                print(point)
+                print(points)
+            wire.points = points
+            wire.update()
+            self.scene.update()
+            # wires_to_redraw.append(wire_id)
+        except Exception as e:
+            print(f"no terminal: {e}")
+        try:
+            wire_id = self.selectedComponent.terminal2To
+            wires_to_redraw.append(wire_id)
+        except Exception as e:
+            print(f"no terminal: {e}")
+        try:
+            wire_id = self.selectedComponent.terminal3To
+            wires_to_redraw.append(wire_id)
+        except Exception as e:
+            print(f"no terminal: {e}")
+        # for wire_id in wires_to_redraw:
+        #     wire = self.wires.get(wire_id)
+        #     for point in wire.points:
+        #         if point == self.selectedComponent.symbol.old_terminal1_position:
+        #             point = self.selectedComponent.symbol.new_terminal1_position
+
     def rotate_selected_components(self):
         # for componentID in self.selectedComponentsIDs:
         #     component = self.components.get(componentID)
         #     component.rotate()
         if self.selectedComponent is None:
-            pass
+            return
+
+        if self.wireToolActive:
+            QMessageBox.information(self, 'Message', f'Can not perform action when wire tool is active.')
+            return
 
         self.selectedComponent.symbol.rotate()
+        self.redraw_wire_on_wire_rotation()
 
     def generate_component(self, component_type):
         pass
@@ -354,9 +485,9 @@ class MyGraphicsView(QGraphicsView):
         print(wires_to_delete)
         for wire in wires_to_delete:
             print("its about to go down")
-            self.scene.removeItem(wire.uiWire)
+            self.scene.removeItem(wire)
             for component in wire.connectedComponents:
-                #     # clear all necessary components that have their terminal'X'to attribute pointing to the wire
+                # clear all necessary components that have their terminal'X'to attribute pointing to the wire
                 print(component)
                 actual_component = self.canvasComponents.get(component[0])
                 if component[1] == 1:
@@ -367,7 +498,7 @@ class MyGraphicsView(QGraphicsView):
                     print("makes sense")
                     try:
                         actual_component.terminal2to = ""
-            #         component[0].set_terminal_2_to("")
+                    #         component[0].set_terminal_2_to("")
                     except Exception as e:
                         print(e)
                 elif component[1] == 3:
@@ -390,6 +521,63 @@ class MyGraphicsView(QGraphicsView):
         # remove component from dictionary
         _ = self.canvasComponents.pop(component_id)  # will be used when working on undo and redo
         print(self.canvasComponents.keys())
+
+    def delete_wire(self, wire_id):
+        print("\n\n\n")
+        print("-----------------------------------------------")
+        wires = []
+        for item in self.wires:
+            print(item)
+            wires.append(self.wires.get(item))
+        print(self.wires)
+        print(wires)
+
+        # loop over self.wires and remove wires with component ID from the scene
+        wire_ids_to_delete = self.wires.get(wire_id)
+        print(f"wire ids to delete: {wire_ids_to_delete}")
+        wires_to_delete = [self.wires.get(wire_id)]
+        wire = self.wires.get(wire_id)
+        print(wire)
+        # for _wire in wires_to_delete:
+        #     print("its about to go down")
+        #     self.scene.removeItem(_wire)
+        #     for component in _wire.connectedComponents:
+        #         # clear all necessary components that have their terminal'X'to attribute pointing to the wire
+        #         print(component)
+        #         actual_component = self.canvasComponents.get(component[0])
+        #         if component[1] == 1:
+        #             print("makes sense")
+        #             actual_component.terminal1to = ""
+        #         elif component[1] == 2:
+        #             print("makes sense")
+        #             try:
+        #                 actual_component.terminal2to = ""
+        #             except Exception as e:
+        #                 print(e)
+        #         elif component[1] == 3:
+        #             print("makes sense")
+        #             actual_component.terminal31to = ""
+
+        # _ = self.wires.pop(wire_ids_to_delete)
+        self.scene.removeItem(wire)
+        for component in wire.connectedComponents:
+            # clear all necessary components that have their terminal'X'to attribute pointing to the wire
+            print(component)
+            actual_component = self.canvasComponents.get(component[0])
+            if component[1] == 1:
+                print("makes sense")
+                actual_component.terminal1to = ""
+            elif component[1] == 2:
+                print("makes sense")
+                try:
+                    actual_component.terminal2to = ""
+                except Exception as e:
+                    print(e)
+            elif component[1] == 3:
+                print("makes sense")
+                actual_component.terminal31to = ""
+        _ = self.wires.pop(wire_id)
+        print(f"self.wires: {self.wires}")
 
     def generate_unique_wire_count(self) -> int:
         # get all the wireIDs available

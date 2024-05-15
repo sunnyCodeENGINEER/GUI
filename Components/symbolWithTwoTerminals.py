@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QPoint, Qt
-from PyQt6.QtGui import QPainter, QPen, QBrush, QFont
+from PyQt6.QtGui import QPainter, QPen, QBrush, QFont, QTransform
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
 
@@ -16,7 +16,7 @@ class SymbolWithTwoTerminals(QGraphicsItem):
     class Signals(QGraphicsObject):
         # signal sends (uniqueID, terminalIndex) as arguments.
         terminalClicked = pyqtSignal(QPointF, int)
-        componentMoved = pyqtSignal()
+        componentMoved = pyqtSignal(QPointF)
         componentSelected = pyqtSignal()
         componentDeselected = pyqtSignal()
         componentDataChanged = pyqtSignal()
@@ -31,6 +31,11 @@ class SymbolWithTwoTerminals(QGraphicsItem):
 
         # enum for terminal
         self.terminalCLicked = Terminal.none
+
+        # handle moving the symbol
+        self.original_position = QPointF(0.0, 0.0)
+        self.final_position = None
+        self.itemMoved = False
 
         # make symbol selectable and movable
         self.selected = False
@@ -115,6 +120,7 @@ class SymbolWithTwoTerminals(QGraphicsItem):
 
     def mousePressEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
+        # self.original_position = self.scenePos()
         if -self.terminalLength - 3 <= event.pos().x() <= -self.terminalLength + 8 \
                 and self.height // 2 - 3 <= event.pos().y() <= self.height // 2 + 8:
             self.terminalCLicked = Terminal.terminal1
@@ -133,8 +139,31 @@ class SymbolWithTwoTerminals(QGraphicsItem):
         # emit selected
         # self.component_click_slot()
 
+    # def mouseMoveEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
+    #     super(SymbolWithTwoTerminals, self).mouseMoveEvent(event)
+    #     if self.original_position is None:
+    #         self.original_position = self.scenePos()
+    #         print(self.original_position)
+    #     self.itemMoved = True
+    #
+    # def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
+    #     super(SymbolWithTwoTerminals, self).mouseReleaseEvent(event)
+    #     self.final_position = self.scenePos()
+    #     print(f"{self.original_position} --- {self.final_position}")
+        # offset = self.final_position - self.original_position
+        # if self.itemMoved:
+        #     print(self.final_position - self.original_position)
+        #     self.signals.componentMoved.emit(offset)
+        # self.itemMoved = False
+
     def terminal_click_slot(self, terminal_position, terminal_id):
-        self.signals.terminalClicked.emit(terminal_position, terminal_id)
+        # self.signals.terminalClicked.emit(terminal_position, terminal_id)
+        angle = self.rotation()
+        transformation = QTransform()
+        transformation.rotate(angle)
+        mapped_terminal_position = transformation.map(terminal_position)
+        print(f"{terminal_position} :-------: {mapped_terminal_position}")
+        self.signals.terminalClicked.emit(mapped_terminal_position, terminal_id)
 
     def component_click_slot(self):
         self.signals.componentSelected.emit()
