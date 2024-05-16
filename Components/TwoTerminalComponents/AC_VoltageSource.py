@@ -8,3 +8,4 @@ class ACVoltageSource(TwoTerminalComponent):
         self.componentUnit = "V"
         # self.componentName = "AC Voltage Source"
         self.componentType = "Source_AC"
+        self.units = ["V", "kV"]

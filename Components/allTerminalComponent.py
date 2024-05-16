@@ -30,8 +30,10 @@ class OneTerminalComponent:
         self.componentValue = "0"
         self.componentUnit = ""
         self.terminal1To = ""
+        self.units = None
 
-        self.symbol = SymbolWithOneTerminal(name)
+        self.offset = QPointF()
+        self.symbol = SymbolWithOneTerminal(name, self.offset)
 
         # set signals
         self.signals = self.Signals()
@@ -66,6 +68,8 @@ class OneTerminalComponent:
         self.symbol.reset_terminals()
 
     def component_moved(self, offset):
+        print("migos")
+        print(offset)
         self.signals.componentMoved.emit(offset)
 
     def reset_terminal(self):
@@ -138,6 +142,7 @@ class ThreeTerminalComponent(OneTerminalComponent):
 
     def component_moved(self, offset):
         self.signals.componentMoved.emit(offset)
+        # pass
 
     def reset_terminal(self):
         self.symbol.reset_terminals()

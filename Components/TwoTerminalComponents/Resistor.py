@@ -8,3 +8,4 @@ class Resistor(TwoTerminalComponent):
         self.componentUnit = "kOhm"
         # self.componentName = "Resistor"
         self.componentType = "Resistor"
+        self.units = ["Ohm", "kOhm"]

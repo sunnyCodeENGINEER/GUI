@@ -1,11 +1,12 @@
 from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QApplication, QToolBar
+from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QApplication, QToolBar, QVBoxLayout
 
 from MainAppWIndow.AttributesPane.attributesPane import AttributesPane
 from MainAppWIndow.Canvas.canvas import MyGraphicsView
 
 from MainAppWIndow.ComponentsPane.componentsPane import ComponentsPane
+from MainAppWIndow.ResultsandErrorPane.ResultsandErrorPane import LogConsole
 
 
 class MainWindow(QMainWindow):
@@ -19,6 +20,8 @@ class MainWindow(QMainWindow):
         self.componentPane = ComponentsPane()  # component pane
         self.canvas = MyGraphicsView()  # canvas
         self.attributesPane = AttributesPane()
+        self.logConsole = LogConsole()
+        self.attributes_pane_and_log_console = QVBoxLayout()
         self.init_ui()
         self._create_toolbar()
         self._connect_signals()
@@ -38,7 +41,10 @@ class MainWindow(QMainWindow):
         self.layout.setSpacing(5)
         self.layout.addWidget(self.componentPane, 1)
         self.layout.addWidget(self.canvas, 4)
-        self.layout.addWidget(self.attributesPane, 1)
+        self.attributes_pane_and_log_console.addWidget(self.attributesPane, 3)
+        self.attributes_pane_and_log_console.addWidget(self.logConsole, 1)
+        # self.layout.addWidget(self.attributesPane, 1)
+        self.layout.addLayout(self.attributes_pane_and_log_console)
 
         container = QWidget()
         container.setLayout(self.layout)
@@ -56,7 +62,7 @@ class MainWindow(QMainWindow):
 
         # connect component pane component select to canvas
         self.componentPane.signals.componentSelected.connect(self.on_component_select)
-        
+
     def _create_toolbar(self):
         """Create a toolbar for the main window"""
         # creating a toolbar
@@ -125,8 +131,10 @@ class MainWindow(QMainWindow):
         self.canvas.rotate_selected_components()
 
 
-
 app = QApplication([])
 window = MainWindow()
 window.show()
+with open("../Assets/styles/app.stylesheet.qss", "r") as f:
+    styles = f.read()
+    app.setStyleSheet(styles)
 app.exec()

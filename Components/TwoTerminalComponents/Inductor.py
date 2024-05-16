@@ -8,3 +8,4 @@ class Inductor(TwoTerminalComponent):
         self.componentUnit = "kOhm"
         # self.componentName = "Inductor"
         self.componentType = "Inductor"
+        # self.units = {}

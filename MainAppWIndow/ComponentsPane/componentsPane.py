@@ -180,9 +180,13 @@ class ComponentsPane(QtWidgets.QWidget):
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setContentsMargins(5, 5, 5, 5)
 
+        with open("../Assets/styles/components_pane.stylesheet.qss", "r") as f:
+            styleSheet = f.read()
+            self.setStyleSheet(styleSheet)
+
         label = QLabel("Component Pane", self)
         font = label.font()
-        font.setPointSize(20)
+        font.setPointSize(15)
         font.setBold(True)
         label.setFont(font)
         label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)

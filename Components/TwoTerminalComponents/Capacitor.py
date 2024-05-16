@@ -8,4 +8,5 @@ class Capacitor(TwoTerminalComponent):
         self.componentUnit = "kOhm"
         # self.componentName = "Capacitor"
         self.componentType = "Capacitor"
+
         

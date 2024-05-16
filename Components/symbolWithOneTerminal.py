@@ -20,7 +20,7 @@ class SymbolWithOneTerminal(QGraphicsItem):
         componentDeselected = pyqtSignal()
         componentDataChanged = pyqtSignal()
 
-    def __init__(self, name):
+    def __init__(self, name, offset):
         super().__init__()
         self.width = 90
         self.height = 70
@@ -39,6 +39,8 @@ class SymbolWithOneTerminal(QGraphicsItem):
         self.original_position = None
         self.final_position = None
         self.itemMoved = False
+        self.op = None
+        self.offset = QPointF(0.0, 0.0)
 
         # make symbol selectable and movable
         self.selected = False
@@ -64,6 +66,7 @@ class SymbolWithOneTerminal(QGraphicsItem):
     def paint(self, painter, option, widget: typing.Optional[QWidget] = ...) -> None:
         # initialize painter
         pen = QPen()
+        pen.setColor(Qt.GlobalColor.white)
         painter.setPen(pen)
         body_w = self.width - (2 * self.terminalLength)
         body_h = self.height - (2 * self.terminalLength)
@@ -111,6 +114,7 @@ class SymbolWithOneTerminal(QGraphicsItem):
     def mousePressEvent(self, event) -> None:
         super(SymbolWithOneTerminal, self).mousePressEvent(event)
         self.brush.setColor(Qt.GlobalColor.gray)
+        self.op = self.scenePos()
         if self.original_position is None:
             self.original_position = QPointF(0.0, 0.0)
             print(self.original_position)
@@ -133,23 +137,31 @@ class SymbolWithOneTerminal(QGraphicsItem):
         # emit selected
         # self.component_click_slot()
 
-    # def mouseMoveEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
-    #     super(SymbolWithOneTerminal, self).mouseMoveEvent(event)
-    #     self.itemMoved = True
-    #
-    # def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
-    #     super(SymbolWithOneTerminal, self).mouseReleaseEvent(event)
-    #     self.final_position = self.scenePos()
-    #     print(f"{self.original_position} --- {self.final_position}")
-    #     try:
-    #         offset = self.final_position - self.original_position
-    #     except Exception as e:
-    #         print(e)
-    #         offset = self.final_position
-    #     if self.itemMoved:
-    #         # print(self.final_position - self.original_position)
-    #         self.signals.componentMoved.emit(offset)
-    #     self.itemMoved = False
+    def mouseMoveEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
+        super(SymbolWithOneTerminal, self).mouseMoveEvent(event)
+
+        # if not self.itemMoved:
+        #     self.op = self.scenePos()
+        self.itemMoved = True
+        print(self.op)
+
+    def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
+        super(SymbolWithOneTerminal, self).mouseReleaseEvent(event)
+        self.final_position = self.scenePos()
+        print(f"{self.op} --- {self.final_position}")
+        try:
+            self.offset = self.final_position - self.op
+        except Exception as e:
+            print(e)
+            self.offset = self.final_position
+            self.op = self.final_position
+        if self.itemMoved:
+            print(self.offset)
+            try:
+                self.signals.componentMoved.emit(self.offset)
+            except Exception as e:
+                print(e)
+        self.itemMoved = False
 
     def terminal_click_slot(self, terminal_position, terminal_id):
         angle = self.rotation()

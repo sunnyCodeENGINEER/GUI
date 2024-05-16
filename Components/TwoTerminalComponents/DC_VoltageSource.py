@@ -8,3 +8,4 @@ class DCVoltageSource(TwoTerminalComponent):
         self.componentUnit = "V"
         # self.componentName = "DC Voltage Source"
         self.componentType = "Source_DC"
+        self.units = ["V", "kV"]

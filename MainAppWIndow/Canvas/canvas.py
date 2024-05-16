@@ -16,6 +16,7 @@ from Components.symbolWithThreeTerminals import SymbolWithThreeTerminals
 from Components.symbolWithTwoTerminals import SymbolWithTwoTerminals
 from Components.symbolWithOneTerminal import SymbolWithOneTerminal
 from Components.allTerminalComponent import OneTerminalComponent, ThreeTerminalComponent, TwoTerminalComponent
+from MainAppWIndow.Canvas.CanvasGrid.grid_scene import GridScene
 
 
 class MovingObject(QGraphicsRectItem):
@@ -133,9 +134,18 @@ class MyGraphicsView(QGraphicsView):
         self.label = QLabel()
         self.size = 2
 
-        self.scene = QGraphicsScene()
+        # self.scene = QGraphicsScene()
+        self.scene = GridScene()
         self.setScene(self.scene)
         self.setSceneRect(0, 0, 1200, 1000)
+
+        self.setOptimizationFlag(
+            QGraphicsView.OptimizationFlag.DontAdjustForAntialiasing, True
+        )
+        # RubberBandDrag mode allows the selection of multiple components by dragging to draw a rectangle around them
+        self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
+
+        self.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
         # keep track of components on the canvas
         self.canvasComponents = {}
@@ -182,7 +192,8 @@ class MyGraphicsView(QGraphicsView):
 
     def component_moved(self, offset):
         print(offset)
-        self.redraw_wire_on_wire_move()
+        print("about to redraw")
+        self.redraw_wire_on_wire_move(offset)
 
     def component_selected(self, component_id):
         # emit component with the selected id to attribute pane
@@ -241,7 +252,8 @@ class MyGraphicsView(QGraphicsView):
                 for item in self.clickedTerminals:
                     component_id = item[0]
                     if component_id.startswith("Ground"):
-                        self.currentWire.wireID = "ground"
+                        unique_count = self.generate_unique_ground_wire_count()
+                        self.currentWire.wireID = f"ground-{unique_count}"
 
                 # # add wire to self.wires
                 # self.wires[wire.wireID] = wire
@@ -323,9 +335,9 @@ class MyGraphicsView(QGraphicsView):
             # store points
             points = []
             for point in wire.points:
-                if point.x() - 10 <= self.selectedComponent.symbol.original_position.x() +\
+                if point.x() - 10 <= self.selectedComponent.symbol.op.x() +\
                         self.selectedComponent.symbol.scenePos().x() <= point.x() + 10 \
-                        and point.y() - 10 <= self.selectedComponent.symbol.original_position.y() +\
+                        and point.y() - 10 <= self.selectedComponent.symbol.op.y() +\
                         self.selectedComponent.symbol.scenePos().y() <= point.y() + 10:
                     # point = self.selectedComponent.symbol.final_position
                     point += offset
@@ -336,7 +348,7 @@ class MyGraphicsView(QGraphicsView):
                 else:
                     print("=======================")
                     print(point)
-                    print(self.selectedComponent.symbol.old_terminal1_position)
+                    print(self.selectedComponent.symbol.op)
                     print(self.selectedComponent.symbol.scenePos())
                     print("=======================")
                 points.append(point)
@@ -422,9 +434,6 @@ class MyGraphicsView(QGraphicsView):
         #             point = self.selectedComponent.symbol.new_terminal1_position
 
     def rotate_selected_components(self):
-        # for componentID in self.selectedComponentsIDs:
-        #     component = self.components.get(componentID)
-        #     component.rotate()
         if self.selectedComponent is None:
             return
 
@@ -492,18 +501,18 @@ class MyGraphicsView(QGraphicsView):
                 actual_component = self.canvasComponents.get(component[0])
                 if component[1] == 1:
                     print("makes sense")
-                    actual_component.terminal1to = ""
+                    actual_component.terminal1To = ""
                     #         component[0].set_terminal_1_to("")
                 elif component[1] == 2:
                     print("makes sense")
                     try:
-                        actual_component.terminal2to = ""
+                        actual_component.terminal2To = ""
                     #         component[0].set_terminal_2_to("")
                     except Exception as e:
                         print(e)
                 elif component[1] == 3:
                     print("makes sense")
-                    actual_component.terminal31to = ""
+                    actual_component.terminal3To = ""
             #         component[0].set_terminal_3_to("")
         # loop over self.wires and remove wires with component ID from self.wires
         # filtered_wires = [item for item in self.wires if item[0] != component_id]
@@ -566,16 +575,16 @@ class MyGraphicsView(QGraphicsView):
             actual_component = self.canvasComponents.get(component[0])
             if component[1] == 1:
                 print("makes sense")
-                actual_component.terminal1to = ""
+                actual_component.terminal1To = ""
             elif component[1] == 2:
                 print("makes sense")
                 try:
-                    actual_component.terminal2to = ""
+                    actual_component.terminal2To = ""
                 except Exception as e:
                     print(e)
             elif component[1] == 3:
                 print("makes sense")
-                actual_component.terminal31to = ""
+                actual_component.terminal3To = ""
         _ = self.wires.pop(wire_id)
         print(f"self.wires: {self.wires}")
 
@@ -589,6 +598,25 @@ class MyGraphicsView(QGraphicsView):
         # print(f"filtered_ids: {filtered_ids}")
         # if there are no existing IDs, return 0
         # filtered_ids = existing_ids
+        if len(filtered_ids) == 0:
+            return 1
+        # sort the IDs in ascending order
+        filtered_ids.sort()
+        # get the last ID
+        last_id = filtered_ids[-1]
+        # get the unique count from the last ID
+        unique_count = int(last_id.split("-")[-1])
+        print(f"unique_count: {unique_count}")
+        # increment the unique count by 1
+        unique_count += 1
+        return unique_count
+
+    def generate_unique_ground_wire_count(self) -> int:
+        # get all the wireIDs available
+        existing_ids = self.wires.keys()
+        print(f"existing_ids : {existing_ids}")
+        # filter the IDs to get only the ones that start with the component name
+        filtered_ids = list(filter(lambda x: x.startswith("ground"), existing_ids))
         if len(filtered_ids) == 0:
             return 1
         # sort the IDs in ascending order

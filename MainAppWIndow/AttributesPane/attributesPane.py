@@ -82,6 +82,9 @@ class AttributesPane(QtWidgets.QWidget):
         self.signals = self.Signals()
 
     def init_ui(self):
+        with open("../Assets/styles/attributes_pane.stylesheet.qss", "r") as f:
+            style_sheet = f.read()
+            self.setStyleSheet(style_sheet)
         # Create a QVBoxLayout to arrange widgets vertically
         layout = QVBoxLayout(self)
 
@@ -90,7 +93,7 @@ class AttributesPane(QtWidgets.QWidget):
 
         # Set font properties for the label (large text)
         font = QFont()
-        font.setPointSize(20)  # Set the font size to 20 points
+        font.setPointSize(15)  # Set the font size to 20 points
         font.setBold(True)  # Set the font weight to bold
         label.setFont(font)
 
@@ -202,7 +205,10 @@ class AttributesPane(QtWidgets.QWidget):
         # Unit
         unit_label = QLabel("Unit:")
         self.unit_combobox = QComboBox()
-        self.unit_combobox.addItems(["m", "cm", "mm", "inch"])
+        if self.component.units is None:
+            self.unit_combobox.addItems(["m", "cm", "mm", "inch"])
+        else:
+            self.unit_combobox.addItems(self.component.units)
         unit_hbox = QHBoxLayout()
         unit_hbox.addWidget(unit_label)
         unit_hbox.addWidget(self.unit_combobox)
@@ -231,7 +237,8 @@ class AttributesPane(QtWidgets.QWidget):
         # layout.addWidget(preview_scene)
         layout.addLayout(name_hbox)
         layout.addLayout(value_hbox)
-        layout.addLayout(unit_hbox)
+        if self.component.units is not None:
+            layout.addLayout(unit_hbox)
         layout.addLayout(action_hbox)
         layout.addWidget(delete_button)
 
@@ -289,7 +296,7 @@ class AttributesPane(QtWidgets.QWidget):
 
         # Set font properties for the label (large text)
         font = QFont()
-        font.setPointSize(10)  # Set the font size to 20 points
+        font.setPointSize(8)  # Set the font size to 20 points
         font.setBold(False)  # Set the font weight to bold
         label.setFont(font)
 

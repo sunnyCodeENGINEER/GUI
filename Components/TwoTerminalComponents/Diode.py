@@ -8,3 +8,4 @@ class Diode(TwoTerminalComponent):
         self.componentUnit = "kOhm"
         # self.componentName = "Diode"
         self.componentType = "Diode"
+        # self.units = {}

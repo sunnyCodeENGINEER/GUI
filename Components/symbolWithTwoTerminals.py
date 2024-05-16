@@ -61,6 +61,7 @@ class SymbolWithTwoTerminals(QGraphicsItem):
     def paint(self, painter, option, widget: typing.Optional[QWidget] = ...) -> None:
         # initialize painter
         pen = QPen()
+        pen.setColor(Qt.GlobalColor.white)
         painter.setPen(pen)
         body_w = self.width - (2 * self.terminalLength)
 

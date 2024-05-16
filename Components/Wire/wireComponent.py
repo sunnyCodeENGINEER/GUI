@@ -57,8 +57,8 @@ class Wire(QGraphicsItem):
 
     def paint(self, painter, option, widget: typing.Optional[QWidget] = ...) -> None:
         # painter = QPainter()
-        print("painting")
-        print(self.points)
+        # print("painting")
+        # print(self.points)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         pen = QPen(Qt.GlobalColor.darkGreen)
         pen.setWidth(20)
