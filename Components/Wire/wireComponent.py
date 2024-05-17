@@ -10,14 +10,17 @@ class Wire(QGraphicsItem):
         wireSelected = pyqtSignal(str)
         wireDeselected = pyqtSignal()
 
-    def __init__(self, points=[]):
+    def __init__(self, color, color_text, points=[]):
         super().__init__()
         self.wireID = ""
         self.wireName = ""
-        self.wireColour = Qt.GlobalColor.darkGreen
+        self.wireColour = color
+        self.wireColourText = color_text
         self.start = None  # where wire starts from
         self.end = None  # where wire ends
         self.connectedComponents = []
+        self.colors = {"darkGreen": Qt.GlobalColor.darkGreen, "darkRed": Qt.GlobalColor.darkRed,
+                       "blue": Qt.GlobalColor.blue, "gray": Qt.GlobalColor.gray}
         self.uiWire = WireDrawing()
 
         self.signal = self.Signals()
@@ -49,8 +52,9 @@ class Wire(QGraphicsItem):
         # self.signals.wireSelected.connect(self.emit_signal)
         # self.connect_signals()
 
-    def printhi(self):
-        print("hi")
+    def set_color(self, text, color):
+        self.wireColour = color
+        self.wireColourText = text
 
     def connect_signals(self):
         self.signals.wireSelected.emit(self.wireID)
@@ -60,7 +64,7 @@ class Wire(QGraphicsItem):
         # print("painting")
         # print(self.points)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        pen = QPen(Qt.GlobalColor.darkGreen)
+        pen = QPen(self.wireColour)
         pen.setWidth(20)
         painter.setPen(pen)
 
@@ -69,7 +73,7 @@ class Wire(QGraphicsItem):
 
         if len(self.points) >= 2:
             # Define a pen for drawing the lines
-            pen = QPen(Qt.GlobalColor.darkGreen)
+            pen = QPen(self.wireColour)
             pen.setWidth(2)
             painter.setPen(pen)
 
@@ -93,6 +97,7 @@ class Wire(QGraphicsItem):
                 # pass
                 self.signals.wireSelected.emit(self.wireID)
                 # self.emit_signal()
+                print(self.wireColour)
 
             else:
                 # pass

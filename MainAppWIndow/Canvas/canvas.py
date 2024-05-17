@@ -237,7 +237,7 @@ class MyGraphicsView(QGraphicsView):
             if len(self.clickedTerminals) == 2:
                 self.wirePoints = []
                 # bring pop up for wire name and set up wire
-                self.currentWire = Wire()
+                self.currentWire = Wire(Qt.GlobalColor.darkGreen, "darkGreen")
                 print("-------------------------------")
                 unique_count = self.generate_unique_wire_count()
                 # self.currentWire.wireID = f"wire-{len(self.wires) + 1}"

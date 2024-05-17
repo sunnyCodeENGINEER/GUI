@@ -27,7 +27,7 @@ class OneTerminalComponent:
         self.componentID = unique_id
         self.componentName = name
         self.componentType = ""
-        self.componentValue = "0"
+        self.componentValue = "100"
         self.componentUnit = ""
         self.terminal1To = ""
         self.units = None

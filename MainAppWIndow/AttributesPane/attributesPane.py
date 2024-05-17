@@ -71,7 +71,7 @@ class AttributesPane(QtWidgets.QWidget):
 
         self.wire_name_edit = QLineEdit()
         self.value_edit = QLineEdit()
-        self.unit_combobox = None
+        self.unit_combobox = QComboBox()
 
         self.component_data_label = QLabel()
 
@@ -205,10 +205,13 @@ class AttributesPane(QtWidgets.QWidget):
         # Unit
         unit_label = QLabel("Unit:")
         self.unit_combobox = QComboBox()
-        if self.component.units is None:
-            self.unit_combobox.addItems(["m", "cm", "mm", "inch"])
-        else:
+        unit = ""
+        if self.component.units is not None:
+            print(self.component.componentUnit)
+            unit = self.component.componentUnit
+            # self.unit_combobox.setCurrentText(unit)
             self.unit_combobox.addItems(self.component.units)
+        self.unit_combobox.setCurrentText(unit)
         unit_hbox = QHBoxLayout()
         unit_hbox.addWidget(unit_label)
         unit_hbox.addWidget(self.unit_combobox)
@@ -236,7 +239,8 @@ class AttributesPane(QtWidgets.QWidget):
         # preview_scene.setMaximumHeight(150)
         # layout.addWidget(preview_scene)
         layout.addLayout(name_hbox)
-        layout.addLayout(value_hbox)
+        if self.component.componentType != "Ground":
+            layout.addLayout(value_hbox)
         if self.component.units is not None:
             layout.addLayout(unit_hbox)
         layout.addLayout(action_hbox)
@@ -269,7 +273,9 @@ class AttributesPane(QtWidgets.QWidget):
         # Color
         color_label = QLabel("Color:")
         self.unit_combobox = QComboBox()
-        self.unit_combobox.addItems(["darkGreen", "red", "blue", "yellow"])
+        colors = self.wire.colors.keys()
+        self.unit_combobox.addItems(colors)
+        self.unit_combobox.setCurrentText(self.wire.wireColourText)
         unit_hbox = QHBoxLayout()
         unit_hbox.addWidget(color_label)
         unit_hbox.addWidget(self.unit_combobox)
@@ -368,6 +374,8 @@ class AttributesPane(QtWidgets.QWidget):
     def on_save(self):
         self.component.componentName = self.wire_name_edit.text()
         self.component.componentValue = self.value_edit.text()
+        unit = self.unit_combobox.currentText()
+        self.component.set_unit(unit)
         self.component.symbol.set_name(self.wire_name_edit.text())
         self.component.symbol.update()
         # print(self.component.componentName)
@@ -383,13 +391,15 @@ class AttributesPane(QtWidgets.QWidget):
 
     def on_wire_save(self):
         self.wire.wireName = self.wire_name_edit.text()
-        # self.component.componentValue = self.value_edit.text()
-        # self.component.symbol.set_name(self.wire_name_edit.text())
-        self.wire.update()
-        # print(self.component.componentName)
+        text = self.unit_combobox.currentText()
+        color = self.wire.colors.get(self.unit_combobox.currentText())
+        self.wire.set_color(text, color)
+        print(self.wire.wireColour)
+        self.wire.redraw()
 
     def on_wire_cancel(self):
         self.wire_name_edit.setText(self.wire.wireName)
+        self.unit_combobox.setCurrentText(self.wire.wireColourText)
         # self.value_edit.setText(self.component.componentValue)
 
     def on_wire_delete(self):

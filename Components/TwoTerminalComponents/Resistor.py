@@ -9,3 +9,5 @@ class Resistor(TwoTerminalComponent):
         # self.componentName = "Resistor"
         self.componentType = "Resistor"
         self.units = ["Ohm", "kOhm"]
+
+        # self.set_unit("kOhm")
