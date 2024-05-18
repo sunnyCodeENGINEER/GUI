@@ -1,7 +1,6 @@
 from PyQt6.QtWidgets import QGraphicsScene
 from PyQt6.QtGui import QPen, QColor
 
-import constants
 
 from MainAppWIndow.Canvas.CanvasGrid.canvas_constants import GRID_SIZE
 

@@ -17,6 +17,7 @@ from Components.symbolWithTwoTerminals import SymbolWithTwoTerminals
 from Components.symbolWithOneTerminal import SymbolWithOneTerminal
 from Components.allTerminalComponent import OneTerminalComponent, ThreeTerminalComponent, TwoTerminalComponent
 from MainAppWIndow.Canvas.CanvasGrid.grid_scene import GridScene
+from Middleware.circuitSimulationMiddleware import SimulationMiddleware
 
 
 class MovingObject(QGraphicsRectItem):
@@ -127,6 +128,7 @@ class MyGraphicsView(QGraphicsView):
         componentDeselected = pyqtSignal()
         wireSelected = pyqtSignal(Wire)
         wireDeselected = pyqtSignal()
+        simulate = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -147,6 +149,7 @@ class MyGraphicsView(QGraphicsView):
 
         self.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
+        self.circuitName: str = ""
         # keep track of components on the canvas
         self.canvasComponents = {}
         # keep track of wires on the canvas
@@ -175,9 +178,20 @@ class MyGraphicsView(QGraphicsView):
 
         # self.scene.addItem(self.nodeTest1)
 
+        self.circuit = None
+        self.isSimulating = False
         self.signals = self.Signals()
-
+        self.signals.simulate.connect(self.simulate)
         # OneTerminalComponent.Signals.componentSelected.connect(self.handle_signal)
+
+    def simulate(self):
+        if self.circuitName == "":
+            self.circuitName = self.show_input_dialog(title='Circuit Name', text='Give a name for the circuit:')
+        self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, 25, 25)
+
+    def on_simulate(self, state: bool):
+        self.isSimulating = state
+        self.signals.simulate.emit()
 
     def _connect_signals(self, component):
 
@@ -212,6 +226,11 @@ class MyGraphicsView(QGraphicsView):
     def wire_selected(self, wire_id):
         # emit component with the selected id to attribute pane
         self.signals.wireSelected.emit(self.wires.get(wire_id))
+        if self.isSimulating:
+            _ = self.wires.get(wire_id)
+            wire_name = _.wireName
+            self.circuit.set_node(wire_id, wire_name)
+            self.circuit.run_analysis()
         # print("Thesis Maame")
         # self.selectedComponent = self.canvasComponents.get(component_id)
 
@@ -309,9 +328,21 @@ class MyGraphicsView(QGraphicsView):
         self.scene.addItem(self.nodeTest1)
         # self.wirePoints.clear()
 
-    def show_input_dialog(self):
+    def show_input_dialog_circuit(self, title='Name Wire', text='Enter Wire name:'):
         # Create an input dialog
-        text, ok_pressed = QInputDialog.getText(self, 'Name Wire', 'Enter Wire name:')
+        text, ok_pressed = QInputDialog.getText(self, title, text)
+
+        # Check if OK button is pressed and handle the input
+        if ok_pressed and text.strip():
+            QMessageBox.information(self, 'Message', f'Circuit {text} named.')
+            # name = text
+            return text
+        else:
+            return None
+
+    def show_input_dialog(self, title='Name Wire', text='Enter Wire name:'):
+        # Create an input dialog
+        text, ok_pressed = QInputDialog.getText(self, title, text)
 
         # Check if OK button is pressed and handle the input
         if ok_pressed and text.strip():
@@ -335,9 +366,9 @@ class MyGraphicsView(QGraphicsView):
             # store points
             points = []
             for point in wire.points:
-                if point.x() - 10 <= self.selectedComponent.symbol.op.x() +\
+                if point.x() - 10 <= self.selectedComponent.symbol.op.x() + \
                         self.selectedComponent.symbol.scenePos().x() <= point.x() + 10 \
-                        and point.y() - 10 <= self.selectedComponent.symbol.op.y() +\
+                        and point.y() - 10 <= self.selectedComponent.symbol.op.y() + \
                         self.selectedComponent.symbol.scenePos().y() <= point.y() + 10:
                     # point = self.selectedComponent.symbol.final_position
                     point += offset
@@ -392,9 +423,9 @@ class MyGraphicsView(QGraphicsView):
             for point in wire.points:
                 # if point == self.selectedComponent.symbol.old_terminal1_position:
                 #     point = self.selectedComponent.symbol.new_terminal1_position
-                if point.x() - 10 <= self.selectedComponent.symbol.old_terminal1_position.x() +\
+                if point.x() - 10 <= self.selectedComponent.symbol.old_terminal1_position.x() + \
                         self.selectedComponent.symbol.scenePos().x() <= point.x() + 10 \
-                        and point.y() - 10 <= self.selectedComponent.symbol.old_terminal1_position.y() +\
+                        and point.y() - 10 <= self.selectedComponent.symbol.old_terminal1_position.y() + \
                         self.selectedComponent.symbol.scenePos().y() <= point.y() + 10:
                     point = self.selectedComponent.symbol.new_terminal1_position + \
                             self.selectedComponent.symbol.scenePos()

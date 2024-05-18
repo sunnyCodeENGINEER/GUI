@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import QSize, QObject, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QApplication, QToolBar, QVBoxLayout
 
@@ -10,6 +10,9 @@ from MainAppWIndow.ResultsandErrorPane.ResultsandErrorPane import LogConsole
 
 
 class MainWindow(QMainWindow):
+    class Signals(QObject):
+        simulate = pyqtSignal()
+
     def __init__(self):
         super(MainWindow, self).__init__()
         self.layout = None
@@ -25,6 +28,9 @@ class MainWindow(QMainWindow):
         self.init_ui()
         self._create_toolbar()
         self._connect_signals()
+        self.signals = self.Signals()
+        # connect canvas to main window simulate signal
+        self.canvas.signals.simulate.connect(self.signals.simulate)
 
     def init_ui(self):
         self.setWindowTitle("NGSpice GUI 0.2")
@@ -52,6 +58,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
     def _connect_signals(self):
+        # # connect canvas to main window simulate signal
+        # self.canvas.signals.simulate.connect(self.signals.simulate)
         # connect canvas component select to attribute pane
         self.canvas.signals.componentSelected.connect(self.on_canvas_component_select)
         self.canvas.signals.componentDeselected.connect(self.on_canvas_component_deselect)
@@ -82,6 +90,7 @@ class MainWindow(QMainWindow):
 
     def on_canvas_wire_select(self, wire):
         self.attributesPane.on_canvas_wire_select(wire)
+
         # print("Thesis Maame")
 
     def on_canvas_wire_deselect(self):
@@ -105,7 +114,8 @@ class MainWindow(QMainWindow):
             QIcon("../Assets/simulate-icon.png"), "Simulate", self
         )
         simulate_button.setStatusTip("Simulate circuit on canvas")
-        simulate_button.triggered.connect(self._create_and_add_rotate_action)
+        simulate_button.triggered.connect(self.on_simulate)
+        simulate_button.setCheckable(True)
         self.toolbar.addAction(simulate_button)
 
     def _create_and_add_wire_tool_action(self):
@@ -129,6 +139,10 @@ class MainWindow(QMainWindow):
 
     def rotate_selected_component(self):
         self.canvas.rotate_selected_components()
+
+    def on_simulate(self, state: bool):
+        # self.signals.simulate.emit()
+        self.canvas.on_simulate(state)
 
 
 app = QApplication([])
