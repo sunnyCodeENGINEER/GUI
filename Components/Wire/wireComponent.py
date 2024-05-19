@@ -9,6 +9,7 @@ class Wire(QGraphicsItem):
     class Signals(QGraphicsObject):
         wireSelected = pyqtSignal(str)
         wireDeselected = pyqtSignal()
+        wirePoint = pyqtSignal(str)
 
     def __init__(self, color, color_text, points=[]):
         super().__init__()
@@ -19,6 +20,7 @@ class Wire(QGraphicsItem):
         self.start = None  # where wire starts from
         self.end = None  # where wire ends
         self.connectedComponents = []
+        self.connectedTo = []
         self.colors = {"darkGreen": Qt.GlobalColor.darkGreen, "darkRed": Qt.GlobalColor.darkRed,
                        "blue": Qt.GlobalColor.blue, "gray": Qt.GlobalColor.gray}
         self.uiWire = WireDrawing()
@@ -68,9 +70,6 @@ class Wire(QGraphicsItem):
         pen.setWidth(20)
         painter.setPen(pen)
 
-        # while len(self.points > 2):
-        #     self.points = self.points[1:]
-
         if len(self.points) >= 2:
             # Define a pen for drawing the lines
             pen = QPen(self.wireColour)
@@ -90,6 +89,11 @@ class Wire(QGraphicsItem):
 
     def redraw(self):
         self.update()
+        
+    def mousePressEvent(self, event: typing.Optional['QGraphicsSceneMouseEvent']) -> None:
+        super(Wire, self).mousePressEvent(event)
+        self.signals.wirePoint.emit(self.wireID)
+        print(self.connectedTo)
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value):
         if change == QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
@@ -97,7 +101,7 @@ class Wire(QGraphicsItem):
                 # pass
                 self.signals.wireSelected.emit(self.wireID)
                 # self.emit_signal()
-                print(self.wireColour)
+                # self.signals.wirePoint.emit(self.wireID, self.pos())
 
             else:
                 # pass

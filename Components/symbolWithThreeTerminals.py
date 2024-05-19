@@ -40,6 +40,7 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         self.original_position = None
         self.final_position = None
         self.itemMoved = False
+        self.op = None
 
         # make symbol selectable and movable
         self.selected = False
@@ -96,13 +97,13 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # draw image
-        scaled_image = self.image.scaled(80, 80)
-        painter.drawImage(self.terminalLength, 1, scaled_image)
+        # scaled_image = self.image.scaled(80, 80)
+        # painter.drawImage(self.terminalLength, 1, scaled_image)
 
         # draw component name
         font = QFont("Arial", 8)  # Specify font family and font size (e.g., 12 points)
         painter.setFont(font)
-        painter.drawText(10, self.height - 3, self.name)
+        painter.drawText(10, 10, self.name)
 
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
@@ -144,7 +145,7 @@ class SymbolWithThreeTerminals(QGraphicsItem):
 
     def mousePressEvent(self, event) -> None:
         self.brush.setColor(Qt.GlobalColor.gray)
-        self.original_position = self.scenePos()
+        self.op = event.scenePos()
         if -self.terminalLength - 3 <= event.pos().x() <= -self.terminalLength + 8 \
                 and self.height // 2 - 3 <= event.pos().y() <= self.height // 2 + 8:
             self.terminalCLicked = Terminal.terminal1
@@ -172,20 +173,20 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         # emit selected
         # self.component_click_slot()
 
-    # def mouseMoveEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
-    #     super(SymbolWithThreeTerminals, self).mouseMoveEvent(event)
-    #     self.itemMoved = True
-    #
-    # def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
-    #     super(SymbolWithThreeTerminals, self).mouseReleaseEvent(event)
-    #     print(self.original_position)
-    #     self.final_position = self.scenePos()
-    #     print(f"{self.original_position} --- {self.final_position}")
-    #     offset = self.final_position - self.original_position
-    #     if self.itemMoved:
-    #         print(self.final_position - self.original_position)
-    #         self.signals.componentMoved.emit(offset)
-    #     self.itemMoved = False
+    def mouseMoveEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
+        super(SymbolWithThreeTerminals, self).mouseMoveEvent(event)
+        self.itemMoved = True
+
+    def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
+        super(SymbolWithThreeTerminals, self).mouseReleaseEvent(event)
+        print(self.op)
+        self.final_position = event.scenePos()
+        print(f"{self.op} --- {self.final_position}")
+        offset = self.final_position - self.op
+        if self.itemMoved:
+            print(self.final_position - self.op)
+            self.signals.componentMoved.emit(offset)
+        self.itemMoved = False
 
     def terminal_click_slot(self, terminal_position, terminal_id):
         # self.signals.terminalClicked.emit(terminal_position, terminal_id)

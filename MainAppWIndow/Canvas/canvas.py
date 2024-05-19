@@ -164,6 +164,9 @@ class MyGraphicsView(QGraphicsView):
         self.terminalPoint = []
         self.terminalPointIndex = 0
 
+        self.point1 = None
+        self.point2 = None
+
         # will all go!
         self.moveObject = MovingObject(50, 50, 40)
         # self.moveObject2 = MovingObject(10, 50, 30)
@@ -203,6 +206,7 @@ class MyGraphicsView(QGraphicsView):
     def _connect_wire_signals(self, wire):
         wire.signals.wireSelected.connect(self.wire_selected)
         wire.signals.wireDeselected.connect(self.wire_deselected)
+        wire.signals.wirePoint.connect(self.wire_connection_point)
 
     def component_moved(self, offset):
         print(offset)
@@ -222,6 +226,52 @@ class MyGraphicsView(QGraphicsView):
         self.signals.componentDeselected.emit()
 
         self.selectedComponent = None
+
+    def mousePressEvent(self, event: typing.Optional[QtGui.QMouseEvent]) -> None:
+        super(MyGraphicsView, self).mousePressEvent(event)
+        if self.wireToolActive:
+            self.point1 = self.point2
+            self.point2 = QPointF(event.pos())
+
+    def wire_connection_point(self, wire_id):
+        print(f"{wire_id} : {self.point1} , {self.point2}")
+        if self.wireToolActive:
+            if self.point2 is not None and self.point1 is not None:
+                # _x = self.points[-1]
+                # points = [self.points[-1], point]
+                # wire = Wire(Qt.GlobalColor.darkGreen, "darkGreen", points=points)
+                origin_wire = self.wires.get(wire_id)
+                points = [QPointF((origin_wire.points[0].x() + origin_wire.points[1].x()) / 2,
+                                  (origin_wire.points[0].y() + origin_wire.points[1].y()) / 2),
+                          self.point2
+                          ]
+
+                self.currentWire = Wire(Qt.GlobalColor.darkGreen, "darkGreen", points=points)
+                # wire.connectedTo = wire_id
+                self.currentWire.wireName = self.show_input_dialog()
+                unique_count = self.generate_unique_wire_count()
+                # # self.currentWire.wireID = f"wire-{len(self.wires) + 1}"
+                self.currentWire.wireID = f"wire-{unique_count}"
+                self.currentWire.connectedTo.append(wire_id)
+
+                # self.currentWire = wire
+                self._connect_wire_signals(self.currentWire)
+                try:
+                    self.wires[self.currentWire.wireID] = self.currentWire
+                except Exception as e:
+                    print(e)
+                try:
+                    self.scene.addItem(self.currentWire)
+                    print(self.wires)
+                    # clear points
+                    self.point1 = None
+                    self.point2 = None
+                    return
+                except Exception as e:
+                    print(e)
+
+                # self.points = []
+        #         pass
 
     def wire_selected(self, wire_id):
         # emit component with the selected id to attribute pane
@@ -320,6 +370,8 @@ class MyGraphicsView(QGraphicsView):
 
                 # self.scene.addItem(self.currentWire.uiWire)
                 self.scene.addItem(self.currentWire)
+                self.point1 = None
+                self.point2 = None
                 # self.draw_wire()
                 self.terminalPoint = []
 
@@ -353,6 +405,8 @@ class MyGraphicsView(QGraphicsView):
             return None
 
     def redraw_wire_on_wire_move(self, offset):
+        self.point1 = None
+        self.point2 = None
         print("here")
         # return
         wires_to_redraw = []
@@ -363,13 +417,19 @@ class MyGraphicsView(QGraphicsView):
             print(wire_id)
             wire = self.wires.get(wire_id)
             print(wire)
+            # component specific offset
+            comp_offset = QPointF()
+            if self.selectedComponent.componentType == "Ground":
+                comp_offset = QPointF(-14, -28.0)
+            else:
+                comp_offset = QPointF(-45, 0)
             # store points
             points = []
             for point in wire.points:
-                if point.x() - 10 <= self.selectedComponent.symbol.op.x() + \
-                        self.selectedComponent.symbol.scenePos().x() <= point.x() + 10 \
-                        and point.y() - 10 <= self.selectedComponent.symbol.op.y() + \
-                        self.selectedComponent.symbol.scenePos().y() <= point.y() + 10:
+                if point.x() - 20 <= self.selectedComponent.symbol.op.x() + \
+                        comp_offset.x() <= point.x() + 20 \
+                        and point.y() - 20 <= self.selectedComponent.symbol.op.y() + \
+                        comp_offset.y() <= point.y() + 20:
                     # point = self.selectedComponent.symbol.final_position
                     point += offset
                     # points.append(point)
@@ -379,7 +439,9 @@ class MyGraphicsView(QGraphicsView):
                 else:
                     print("=======================")
                     print(point)
+                    print(comp_offset)
                     print(self.selectedComponent.symbol.op)
+                    print(self.selectedComponent.symbol.op + comp_offset)
                     print(self.selectedComponent.symbol.scenePos())
                     print("=======================")
                 points.append(point)
@@ -392,13 +454,78 @@ class MyGraphicsView(QGraphicsView):
         except Exception as e:
             print(f"no terminal: {e}")
         try:
+            print("\n\nterminal 2")
             wire_id = self.selectedComponent.terminal2To
-            wires_to_redraw.append(wire_id)
+            # wires_to_redraw.append(wire_id)
+            wire = self.wires.get(wire_id)
+            print(wire)
+            # component specific offset
+            # comp_offset = QPointF()
+            comp_offset = QPointF(60, 10)
+            # store points
+            points = []
+            for point in wire.points:
+                if point.x() - 30 <= self.selectedComponent.symbol.op.x() + \
+                        comp_offset.x() <= point.x() + 30 \
+                        and point.y() - 30 <= self.selectedComponent.symbol.op.y() + \
+                        comp_offset.y() <= point.y() + 30:
+                    # point = self.selectedComponent.symbol.final_position
+                    point += offset
+                    # points.append(point)
+                    print(point)
+                    print(points)
+                    print("should redraw")
+                else:
+                    print("=======================")
+                    print(point)
+                    print(comp_offset)
+                    print(self.selectedComponent.symbol.op)
+                    print(self.selectedComponent.symbol.op + comp_offset)
+                    print(self.selectedComponent.symbol.scenePos())
+                    print("=======================")
+                points.append(point)
+                print(point)
+                print(points)
+            wire.points = points
+            wire.update()
+            self.scene.update()
+            # wires_to_redraw.append(wire_id)
         except Exception as e:
             print(f"no terminal: {e}")
         try:
+            print("\n\nterminal 3")
             wire_id = self.selectedComponent.terminal3To
-            wires_to_redraw.append(wire_id)
+            wire = self.wires.get(wire_id)
+            print(wire)
+            # component specific offset
+            comp_offset = QPointF(-20, 20)
+            # store points
+            points = []
+            for point in wire.points:
+                if point.x() - 30 <= self.selectedComponent.symbol.op.x() + \
+                        comp_offset.x() <= point.x() + 30 \
+                        and point.y() - 30 <= self.selectedComponent.symbol.op.y() + \
+                        comp_offset.y() <= point.y() + 30:
+                    # point = self.selectedComponent.symbol.final_position
+                    point += offset
+                    # points.append(point)
+                    print(point)
+                    print(points)
+                    print("should redraw")
+                else:
+                    print("=======================")
+                    print(point)
+                    print(comp_offset)
+                    print(self.selectedComponent.symbol.op)
+                    print(self.selectedComponent.symbol.op + comp_offset)
+                    print(self.selectedComponent.symbol.scenePos())
+                    print("=======================")
+                points.append(point)
+                print(point)
+                print(points)
+            wire.points = points
+            wire.update()
+            self.scene.update()
         except Exception as e:
             print(f"no terminal: {e}")
         # for wire_id in wires_to_redraw:
@@ -694,6 +821,8 @@ class MyGraphicsView(QGraphicsView):
 
     def on_wire_tool_click(self, wire_tool_state: bool):
         self.wireToolActive = wire_tool_state
+        self.point1 = None
+        self.point2 = None
 
     @staticmethod
     def handle_signal(value):

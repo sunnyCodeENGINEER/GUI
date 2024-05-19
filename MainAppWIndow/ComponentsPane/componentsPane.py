@@ -253,6 +253,6 @@ class ComponentsPane(QtWidgets.QWidget):
         elif component_type == "Voltage Source (AC)":
             component = ACVoltageSource("Source_AC-", "Source_AC-")
         elif component_type == "Test Transistor":
-            component = TestTransistor("test_transist-", "test_transist-")
+            component = TestTransistor("Transistor-", "Transistor-")
         return component
 

@@ -114,7 +114,7 @@ class SymbolWithOneTerminal(QGraphicsItem):
     def mousePressEvent(self, event) -> None:
         super(SymbolWithOneTerminal, self).mousePressEvent(event)
         self.brush.setColor(Qt.GlobalColor.gray)
-        self.op = self.scenePos()
+        self.op = event.scenePos()
         if self.original_position is None:
             self.original_position = QPointF(0.0, 0.0)
             print(self.original_position)
@@ -147,7 +147,7 @@ class SymbolWithOneTerminal(QGraphicsItem):
 
     def mouseReleaseEvent(self, event: 'QGraphicsSceneMouseEvent') -> None:
         super(SymbolWithOneTerminal, self).mouseReleaseEvent(event)
-        self.final_position = self.scenePos()
+        self.final_position = event.scenePos()
         print(f"{self.op} --- {self.final_position}")
         try:
             self.offset = self.final_position - self.op
