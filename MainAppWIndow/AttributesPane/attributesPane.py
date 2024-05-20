@@ -71,6 +71,15 @@ class AttributesPane(QtWidgets.QWidget):
 
         self.wire_name_edit = QLineEdit()
         self.value_edit = QLineEdit()
+        self.attribute1 = QLineEdit()
+        self.attribute2 = QLineEdit()
+        self.attribute3 = QLineEdit()
+        self.attribute4 = QLineEdit()
+        self.attribute5 = QLineEdit()
+        self.attribute6 = QLineEdit()
+        self.attribute7 = QLineEdit()
+        self.attribute8 = QLineEdit()
+        self.attribute9 = QLineEdit()
         self.unit_combobox = QComboBox()
 
         self.component_data_label = QLabel()
@@ -243,8 +252,65 @@ class AttributesPane(QtWidgets.QWidget):
             layout.addLayout(value_hbox)
         if self.component.units is not None:
             layout.addLayout(unit_hbox)
+        if self.component.componentType == "Diode":
+            self.diode_characteristics(layout)
         layout.addLayout(action_hbox)
         layout.addWidget(delete_button)
+
+    def diode_characteristics(self, layout):
+        # Is
+        attribute1_label = QLabel("Is:")
+        self.attribute1 = QLineEdit(self)
+        self.attribute1.setText(self.component.Is)
+        attribute1_unit = QLabel("nA")
+        attribute1_hbox = QHBoxLayout()
+        attribute1_hbox.addWidget(attribute1_label)
+        attribute1_hbox.addWidget(self.attribute1)
+        attribute1_hbox.addWidget(attribute1_unit)
+
+        # Rs
+        attribute2_label = QLabel("Rs:")
+        self.attribute2 = QLineEdit(self)
+        self.attribute2.setText(self.component.Rs)
+        attribute2_unit = QLabel("Ohms")
+        attribute2_hbox = QHBoxLayout()
+        attribute2_hbox.addWidget(attribute2_label)
+        attribute2_hbox.addWidget(self.attribute2)
+        attribute2_hbox.addWidget(attribute2_unit)
+
+        # BV
+        attribute3_label = QLabel("BV:")
+        self.attribute3 = QLineEdit(self)
+        self.attribute3.setText(self.component.BV)
+        attribute3_unit = QLabel("V")
+        attribute3_hbox = QHBoxLayout()
+        attribute3_hbox.addWidget(attribute3_label)
+        attribute3_hbox.addWidget(self.attribute3)
+        attribute3_hbox.addWidget(attribute3_unit)
+
+        # IBV
+        attribute4_label = QLabel("IBV:")
+        self.attribute4 = QLineEdit(self)
+        self.attribute4.setText(self.component.IBV)
+        attribute4_unit = QLabel("V")
+        attribute4_hbox = QHBoxLayout()
+        attribute4_hbox.addWidget(attribute4_label)
+        attribute4_hbox.addWidget(self.attribute4)
+        attribute4_hbox.addWidget(attribute4_unit)
+
+        # N
+        attribute5_label = QLabel("N:")
+        self.attribute5 = QLineEdit(self)
+        self.attribute5.setText(self.component.N)
+        attribute5_hbox = QHBoxLayout()
+        attribute5_hbox.addWidget(attribute5_label)
+        attribute5_hbox.addWidget(self.attribute5)
+
+        layout.addLayout(attribute1_hbox)
+        layout.addLayout(attribute2_hbox)
+        layout.addLayout(attribute3_hbox)
+        layout.addLayout(attribute4_hbox)
+        layout.addLayout(attribute5_hbox)
 
     def wire_data(self, layout):
         # Create a QLabel for the large text
@@ -377,12 +443,24 @@ class AttributesPane(QtWidgets.QWidget):
         unit = self.unit_combobox.currentText()
         self.component.set_unit(unit)
         self.component.symbol.set_name(self.wire_name_edit.text())
+        if self.component.componentType == "Diode":
+            self.component.Is = self.attribute1.text()
+            self.component.Rs = self.attribute2.text()
+            self.component.BV = self.attribute3.text()
+            self.component.IBV = self.attribute4.text()
+            self.component.N = self.attribute5.text()
         self.component.symbol.update()
         # print(self.component.componentName)
 
     def on_cancel(self):
         self.wire_name_edit.setText(self.component.componentName)
         self.value_edit.setText(self.component.componentValue)
+        if self.component.componentType == "Diode":
+            self.attribute1.setText(self.component.Is)
+            self.attribute2.setText(self.component.Rs)
+            self.attribute3.setText(self.component.BV)
+            self.attribute4.setText(self.component.IBV)
+            self.attribute5.setText(self.component.N)
 
     def on_delete(self):
         self.signals.deleteComponent.emit(self.component.componentID)
@@ -410,4 +488,3 @@ class AttributesPane(QtWidgets.QWidget):
     @staticmethod
     def handle_signal(value):
         print(f"Received signal with value: {value}")
-

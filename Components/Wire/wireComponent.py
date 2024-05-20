@@ -10,6 +10,7 @@ class Wire(QGraphicsItem):
         wireSelected = pyqtSignal(str)
         wireDeselected = pyqtSignal()
         wirePoint = pyqtSignal(str)
+        wireMoved = pyqtSignal(str, QPointF)
 
     def __init__(self, color, color_text, points=[]):
         super().__init__()
@@ -37,6 +38,11 @@ class Wire(QGraphicsItem):
         self.height = 1000
         self.terminalLength = 5
         self.padding = 10
+
+        # to handle wire movement
+        self.originalPosition = None
+        self.finalPosition = None
+        self.isMoved = False
 
         self.selected = False
 
@@ -89,11 +95,36 @@ class Wire(QGraphicsItem):
 
     def redraw(self):
         self.update()
-        
+
+    def redraw_on_origin_move(self, _, offset: QPointF):
+        points = []
+        for point in self.points:
+            # if original_position.x():
+            #     pass
+            point += offset
+            points.append(point)
+
+        self.update()
+
     def mousePressEvent(self, event: typing.Optional['QGraphicsSceneMouseEvent']) -> None:
         super(Wire, self).mousePressEvent(event)
         self.signals.wirePoint.emit(self.wireID)
+        self.originalPosition = event.scenePos()
+        print(event.scenePos())
         print(self.connectedTo)
+
+    def mouseMoveEvent(self, event: typing.Optional['QGraphicsSceneMouseEvent']) -> None:
+        super(Wire, self).mouseMoveEvent(event)
+        self.isMoved = True
+
+    def mouseReleaseEvent(self, event: typing.Optional['QGraphicsSceneMouseEvent']) -> None:
+        super(Wire, self).mouseReleaseEvent(event)
+        if self.isMoved:
+            self.finalPosition = event.scenePos()
+            offset = self.finalPosition - self.originalPosition
+            print(offset)
+            self.signals.wireMoved.emit(self.wireID, offset)
+        self.isMoved = False
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value):
         if change == QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
@@ -111,10 +142,10 @@ class Wire(QGraphicsItem):
 
     def calculate_line_bounding_rect(self, point1, point2):
         # Calculate minimum and maximum coordinates
-        min_x = min(point1.x(), point2.x())
-        max_x = max(point1.x(), point2.x())
-        min_y = min(point1.y(), point2.y())
-        max_y = max(point1.y(), point2.y())
+        min_x = min(point1.x() - 3, point2.x() - 3)
+        max_x = max(point1.x() + 3, point2.x() + 3)
+        min_y = min(point1.y() - 3, point2.y() - 3)
+        max_y = max(point1.y() + 3, point2.y() + 3)
 
         return QRectF(min_x, min_y, max_x - min_x, max_y - min_y)
 

@@ -9,3 +9,8 @@ class Diode(TwoTerminalComponent):
         # self.componentName = "Diode"
         self.componentType = "Diode"
         # self.units = {}
+        self.Is = "4.35"
+        self.Rs = "0.64"
+        self.BV = "110"
+        self.IBV = "0.0001"
+        self.N = "1.906"
