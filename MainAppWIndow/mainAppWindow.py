@@ -8,7 +8,7 @@ from MainAppWIndow.Canvas.canvas import MyGraphicsView
 from MainAppWIndow.ComponentsPane.componentsPane import ComponentsPane
 from MainAppWIndow.ResultsandErrorPane.ResultsandErrorPane import LogConsole
 
-# from logger import qt_log_handler
+from Components.Logger import qt_handler
 
 
 class MainWindow(QMainWindow):
@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self):
         # # connect canvas to main window simulate signal
-        # self.canvas.signals.simulate.connect(self.signals.simulate)
+        self.canvas.signals.simulationData.connect(self.on_data_received)
         # connect canvas component select to attribute pane
         self.canvas.signals.componentSelected.connect(self.on_canvas_component_select)
         self.canvas.signals.componentDeselected.connect(self.on_canvas_component_deselect)
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.componentPane.signals.componentSelected.connect(self.on_component_select)
 
         # connect log signal to results and error pane
-        # qt_
+        qt_handler.signals.log.connect(self.logConsole.on_log)
 
     def _create_toolbar(self):
         """Create a toolbar for the main window"""
@@ -148,6 +148,9 @@ class MainWindow(QMainWindow):
     def on_simulate(self, state: bool):
         # self.signals.simulate.emit()
         self.canvas.on_simulate(state)
+
+    def on_data_received(self, text):
+        self.logConsole.on_log(text)
 
 
 app = QApplication([])

@@ -129,6 +129,7 @@ class MyGraphicsView(QGraphicsView):
         wireSelected = pyqtSignal(Wire)
         wireDeselected = pyqtSignal()
         simulate = pyqtSignal()
+        simulationData = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -188,9 +189,19 @@ class MyGraphicsView(QGraphicsView):
         # OneTerminalComponent.Signals.componentSelected.connect(self.handle_signal)
 
     def simulate(self):
-        if self.circuitName == "":
-            self.circuitName = self.show_input_dialog(title='Circuit Name', text='Give a name for the circuit:')
-        self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, 25, 25)
+        if self.isSimulating:
+            if self.circuitName == "":
+                self.circuitName = self.show_input_dialog(title='Circuit Name', text='Give a name for the circuit:')
+            self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, 25, 25)
+            self.signals.simulationData.emit(f"Creating circuit: {self.circuitName}")
+            self.signals.simulationData.emit("=======================")
+            try:
+                self.circuit.signals.simulationData.connect(self.data_received)
+            except Exception as e:
+                print(e)
+
+    def data_received(self, text):
+        self.signals.simulationData.emit(text)
 
     def on_simulate(self, state: bool):
         self.isSimulating = state
