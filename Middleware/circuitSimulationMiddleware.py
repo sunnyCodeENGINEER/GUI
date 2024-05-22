@@ -9,6 +9,7 @@ from PySpice.Spice.Netlist import Circuit
 from PySpice.Unit import *
 
 from PyQt6.QtCore import pyqtSignal, QObject
+from Components.logger import logger
 
 # from Components.allTerminalComponent import OneTerminalComponent, ThreeTerminalComponent
 
@@ -64,6 +65,7 @@ class SimulationMiddleware:
 
         # self.test_circuit()
         try:
+            logger.info("Extracting Components Information")
             component_ids = self.components.keys()
             for component_id in component_ids:
                 component = self.components.get(component_id)
@@ -76,7 +78,9 @@ class SimulationMiddleware:
                 # else:
                 #     self.get_circuit_representation(component)
                 self.get_circuit_representation(component)
-                self.run_analysis()
+            logger.info("Components Information Extracted")
+            logger.info("Creating PySpice Circuit")
+            self.run_analysis()
         except Exception as e:
             print(e)
             print(self.components.keys())
@@ -225,6 +229,7 @@ class SimulationMiddleware:
         self.signals.simulationData.emit(data)
 
     def run_analysis(self):
+        logger.info("Simulating Circuit")
         simulator = self.circuit.simulator(temperature=self.operating_temp, nominal_temperature=self.nominal_temp)
         analysis = simulator.operating_point()
         print(analysis)

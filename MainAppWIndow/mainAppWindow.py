@@ -8,8 +8,8 @@ from MainAppWIndow.Canvas.canvas import MyGraphicsView
 from MainAppWIndow.ComponentsPane.componentsPane import ComponentsPane
 from MainAppWIndow.ResultsandErrorPane.ResultsandErrorPane import LogConsole
 
-from Components.Logger import qt_handler
-
+from Components.logger import qt_log_handler
+# from Components.logger.qt_handler import QtLogHandler
 
 class MainWindow(QMainWindow):
     class Signals(QObject):
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
         self.componentPane.signals.componentSelected.connect(self.on_component_select)
 
         # connect log signal to results and error pane
-        qt_handler.signals.log.connect(self.logConsole.on_log)
+        qt_log_handler.signals.log.connect(self.logConsole.on_log)
 
     def _create_toolbar(self):
         """Create a toolbar for the main window"""

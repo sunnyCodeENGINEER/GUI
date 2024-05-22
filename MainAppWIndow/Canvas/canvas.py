@@ -193,8 +193,8 @@ class MyGraphicsView(QGraphicsView):
             if self.circuitName == "":
                 self.circuitName = self.show_input_dialog(title='Circuit Name', text='Give a name for the circuit:')
             self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, 25, 25)
-            self.signals.simulationData.emit(f"Creating circuit: {self.circuitName}")
-            self.signals.simulationData.emit("=======================")
+            self.signals.simulationData.emit(f"Circuit Created: {self.circuitName}")
+            self.signals.simulationData.emit("======================")
             try:
                 self.circuit.signals.simulationData.connect(self.data_received)
             except Exception as e:

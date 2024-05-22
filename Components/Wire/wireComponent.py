@@ -142,10 +142,10 @@ class Wire(QGraphicsItem):
 
     def calculate_line_bounding_rect(self, point1, point2):
         # Calculate minimum and maximum coordinates
-        min_x = min(point1.x() - 3, point2.x() - 3)
-        max_x = max(point1.x() + 3, point2.x() + 3)
-        min_y = min(point1.y() - 3, point2.y() - 3)
-        max_y = max(point1.y() + 3, point2.y() + 3)
+        min_x = min(point1.x() - 1, point2.x() - 1)
+        max_x = max(point1.x() + 1, point2.x() + 1)
+        min_y = min(point1.y() - 1, point2.y() - 1)
+        max_y = max(point1.y() + 1, point2.y() + 1)
 
         return QRectF(min_x, min_y, max_x - min_x, max_y - min_y)
 
