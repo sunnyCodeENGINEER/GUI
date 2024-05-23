@@ -22,15 +22,17 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         componentDeselected = pyqtSignal()
         componentDataChanged = pyqtSignal()
 
-    def __init__(self, name):
+    def __init__(self, name, value="", unit=""):
         super().__init__()
         self.width = 90
         self.height = 70
         self.terminalLength = 5
         self.padding = 10
         self.name = name
+        self.value = value
+        self.unit = unit
 
-        self.image_path = "../Assets/ResistorBG.png"
+        self.image_path = "../Assets/symbols/Transistor.png"
         self.image = QImage(self.image_path)
 
         # enum for terminal
@@ -98,7 +100,7 @@ class SymbolWithThreeTerminals(QGraphicsItem):
 
         # draw image
         # scaled_image = self.image.scaled(80, 80)
-        # painter.drawImage(self.terminalLength, 1, scaled_image)
+        painter.drawImage(0, 0, self.image)
 
         # draw component name
         font = QFont("Arial", 8)  # Specify font family and font size (e.g., 12 points)

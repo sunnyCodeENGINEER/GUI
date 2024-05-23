@@ -443,6 +443,8 @@ class AttributesPane(QtWidgets.QWidget):
         unit = self.unit_combobox.currentText()
         self.component.set_unit(unit)
         self.component.symbol.set_name(self.wire_name_edit.text())
+        self.component.symbol.set_value(self.value_edit.text())
+        self.component.symbol.set_unit(unit)
         if self.component.componentType == "Diode":
             self.component.Is = self.attribute1.text()
             self.component.Rs = self.attribute2.text()

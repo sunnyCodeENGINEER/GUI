@@ -172,8 +172,8 @@ class MyGraphicsView(QGraphicsView):
         self.moveObject = MovingObject(50, 50, 40)
         # self.moveObject2 = MovingObject(10, 50, 30)
 
-        self.moveObject3 = SymbolWithTwoTerminals("name")
-        self.moveObject2 = SymbolWithThreeTerminals("name")
+        # self.moveObject3 = SymbolWithTwoTerminals("name")
+        # self.moveObject2 = SymbolWithThreeTerminals("name")
         # self.moveObject4 = TwoTerminalComponent("Transistor001", "Transistor-1")
         points = [QPoint(20, 20), QPoint(20, 80), QPoint(20, 100)]
         self.nodeTest1 = WireDrawing(points)
@@ -300,6 +300,7 @@ class MyGraphicsView(QGraphicsView):
                 if self.currentWire.wireName == "":
                     self.clickedTerminals.clear()
                     self.terminalPoint.clear()
+                    self.currentWire = None
                     return
                 unique_count = self.generate_unique_wire_count()
                 # # self.currentWire.wireID = f"wire-{len(self.wires) + 1}"
@@ -335,6 +336,7 @@ class MyGraphicsView(QGraphicsView):
                     # clear points
                     self.point1 = None
                     self.point2 = None
+                    self.clickedTerminals.clear()
                     return
                 except Exception as e:
                     print(e)

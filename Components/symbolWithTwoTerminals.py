@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QPoint, Qt
-from PyQt6.QtGui import QPainter, QPen, QBrush, QFont, QTransform
+from PyQt6.QtGui import QPainter, QPen, QBrush, QFont, QTransform, QImage
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
 
@@ -21,13 +21,19 @@ class SymbolWithTwoTerminals(QGraphicsItem):
         componentDeselected = pyqtSignal()
         componentDataChanged = pyqtSignal()
 
-    def __init__(self, name):
+    def __init__(self, name, value, unit, image_path):
         super().__init__()
         self.width = 90
         self.height = 70
         self.terminalLength = 5
         self.padding = 10
         self.name = name
+        self.value = value
+        self.unit = unit
+        print(f"Image Path: {image_path}")
+
+        self.image_path = image_path
+        # self.image = QImage(self.image_path)
 
         # enum for terminal
         self.terminalCLicked = Terminal.none
@@ -89,10 +95,20 @@ class SymbolWithTwoTerminals(QGraphicsItem):
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        # draw symbol
+        try:
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            image = QImage(self.image_path)
+            painter.drawImage(0, 0, image)
+        except Exception as e:
+            print(e)
+
         # draw component name
         font = QFont("Arial", 8)  # Specify font family and font size (e.g., 12 points)
         painter.setFont(font)
-        painter.drawText(10, self.height - 3, self.name)
+        painter.drawText(10, 15, self.name)
+        unit_value = f"{self.value} {self.unit}"
+        painter.drawText(10, self.height - 3, unit_value)
 
         # draw connectors on terminals
         if self.terminalCLicked == Terminal.terminal1:
@@ -184,6 +200,12 @@ class SymbolWithTwoTerminals(QGraphicsItem):
 
     def set_name(self, name):
         self.name = name
+
+    def set_value(self, value):
+        self.value = value
+
+    def set_unit(self, unit):
+        self.unit = unit
 
     def reset_terminals(self):
         self.terminalCLicked = Terminal.none

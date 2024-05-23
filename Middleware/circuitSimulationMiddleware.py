@@ -207,10 +207,13 @@ class SimulationMiddleware:
         elif component.componentType == "Source_AC":
             pass
         elif component.componentType == "Diode":
-            pass
-            # self.circuit.Diode(component.componentName, node_1, node_2, model='MyDiode',
-            #                    raw_spice=f'IS={component.Is}u, RS={component.Rs}u, BV={component.BV}u,\
-            #                     IBV ={component.IBV}u, N={component.N}')
+            self.circuit.model(f'MyDiode', 'D', IS=float(component.Is)@u_nA,
+                               RS=float(component.Rs)@u_Ohm, BV=float(component.BV)@u_V,
+                               IBV=float(component.IBV)@u_V, N=float(component.N))
+            # self.circuit.model('MyDiode', 'D', IS=4.35@u_nA, RS=0.64@u_Ohm, BV=110@u_V,
+            #                                       IBV=0.0001@u_V, N=1.906)
+            # pass
+            self.circuit.Diode(component.componentName, node_1, node_2, model='MyDiode')
 
         if not is_error:
             data2 = "There was an issue.\nPlease check your circuit diagram."
@@ -244,7 +247,10 @@ class SimulationMiddleware:
         wire = self.wires.get(wire_id)
         # Base case
         if not wire.connectedTo:
-            return wire_id
+            if wire.wireID.startswith("ground"):
+                return self.circuit.gnd
+            else:
+                return wire_id
         # Recursive case
         else:
             return self.parent_connection(wire.connectedTo[0])

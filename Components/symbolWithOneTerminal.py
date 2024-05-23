@@ -2,7 +2,7 @@ import typing
 from enum import Enum
 
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, Qt
-from PyQt6.QtGui import QPainter, QPen, QBrush, QFont, QTransform
+from PyQt6.QtGui import QPainter, QPen, QBrush, QFont, QTransform, QImage
 from PyQt6.QtWidgets import QGraphicsObject, QWidget, QGraphicsItem
 
 
@@ -20,13 +20,18 @@ class SymbolWithOneTerminal(QGraphicsItem):
         componentDeselected = pyqtSignal()
         componentDataChanged = pyqtSignal()
 
-    def __init__(self, name, offset):
+    def __init__(self, name, value="", unit=""):
         super().__init__()
         self.width = 90
         self.height = 70
         self.terminalLength = 5
         self.padding = 10
         self.name = name
+        self.value = value
+        self.unit = unit
+
+        self.image_path = "../Assets/symbols/ground.png"
+        self.image = QImage(self.image_path)
 
         # enum for terminal
         self.terminalCLicked = Terminal.none
@@ -90,6 +95,10 @@ class SymbolWithOneTerminal(QGraphicsItem):
         painter.drawLine(t1_a, t1_b)
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # draw image
+        scaled_image = self.image.scaled(50, 50)
+        painter.drawImage(19, 9, scaled_image)
 
         # draw component name
         font = QFont("Arial", 8)  # Specify font family and font size (e.g., 12 points)

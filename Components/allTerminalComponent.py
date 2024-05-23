@@ -77,10 +77,11 @@ class OneTerminalComponent:
 
 
 class TwoTerminalComponent(OneTerminalComponent):
-    def __init__(self, unique_id, name):
+    def __init__(self, unique_id, name, image_path):
         super(TwoTerminalComponent, self).__init__(unique_id, name)
         self.terminal2To = ""
-        self.symbol = SymbolWithTwoTerminals(name)
+        self.image_path = image_path
+        self.symbol = SymbolWithTwoTerminals(name, self.componentValue, self.componentUnit, image_path)
 
         # self.signals.terminalClicked.connect(self.terminal_clicked())
         self.symbol.signals.terminalClicked.connect(self.terminal_clicked)
