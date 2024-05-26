@@ -1,6 +1,7 @@
 from PyQt6.QtCore import QSize, QObject, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon
-from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QApplication, QToolBar, QVBoxLayout
+from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QApplication, QToolBar, QVBoxLayout, QLineEdit, \
+    QPushButton, QInputDialog, QMessageBox
 
 from MainAppWIndow.AttributesPane.attributesPane import AttributesPane
 from MainAppWIndow.Canvas.canvas import MyGraphicsView
@@ -123,6 +124,17 @@ class MainWindow(QMainWindow):
         simulate_button.setCheckable(True)
         self.toolbar.addAction(simulate_button)
 
+    def _create_and_add_simulate_setting_action(self):
+        """Create a simulate action and add it to the toolbar"""
+        # add simulate action
+        simulate_button = QAction(
+            QIcon("../Assets/simulate-icon.png"), "Simulation Settings", self
+        )
+        simulate_button.setStatusTip("Set simulation settings")
+        simulate_button.triggered.connect(self.on_simulation_setting)
+        simulate_button.setCheckable(True)
+        self.toolbar.addAction(simulate_button)
+
     def _create_and_add_wire_tool_action(self):
         """Create a wire tool action and add it to the toolbar"""
         # adding wire tool action to the toolbar
@@ -148,6 +160,9 @@ class MainWindow(QMainWindow):
     def on_simulate(self, state: bool):
         # self.signals.simulate.emit()
         self.canvas.on_simulate(state)
+
+    def on_simulation_setting(self):
+        pass
 
     def on_data_received(self, text):
         self.logConsole.on_log(text)

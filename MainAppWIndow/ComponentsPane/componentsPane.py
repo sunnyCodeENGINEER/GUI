@@ -14,6 +14,7 @@ from Components.TwoTerminalComponents.Capacitor import Capacitor
 from Components.TwoTerminalComponents.DC_VoltageSource import DCVoltageSource
 from Components.TwoTerminalComponents.Diode import Diode
 from Components.TwoTerminalComponents.Inductor import Inductor
+from Components.TwoTerminalComponents.PulseVoltageSource import PulseVoltageSource
 from Components.TwoTerminalComponents.Resistor import Resistor
 from Components.allTerminalComponent import OneTerminalComponent, TwoTerminalComponent
 
@@ -212,7 +213,7 @@ class ComponentsPane(QtWidgets.QWidget):
     def init_components(self):
         button_labels = [
             "Resistor", "Voltage Source (DC)", "Diode", "Ground", "Capacitor", "Inductor", "Voltage Source (AC)",\
-            "Test Transistor"
+            "Test Transistor", "Voltage Source (Pulse)"
         ]
         button_labels.sort()
 
@@ -253,6 +254,8 @@ class ComponentsPane(QtWidgets.QWidget):
             component = Inductor("Inductor-", "Inductor-")
         elif component_type == "Voltage Source (AC)":
             component = ACVoltageSource("Source_AC-", "Source_AC-")
+        elif component_type == "Voltage Source (Pulse)":
+            component = PulseVoltageSource("Source_P-", "Source_P-")
         elif component_type == "Test Transistor":
             component = TestTransistor("Transistor-", "Transistor-")
         elif component_type == "Diode":

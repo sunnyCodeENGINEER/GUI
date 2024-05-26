@@ -11,6 +11,7 @@ from PySpice.Unit import *
 from PyQt6.QtCore import pyqtSignal, QObject
 from Components.logger import logger
 
+
 # from Components.allTerminalComponent import OneTerminalComponent, ThreeTerminalComponent
 
 
@@ -19,10 +20,11 @@ class SimulationMiddleware:
         # simulationResult = pyqtSignal(dict)
         simulationData = pyqtSignal(str)
 
-    def __init__(self, circuit_name, canvas_components, canvas_wires, operating_temp, nominal_temp):
+    def __init__(self, circuit_name, canvas_components, canvas_wires, analysis_type, operating_temp, nominal_temp):
         self.circuit_name = circuit_name
         self.components = canvas_components
         self.wires = canvas_wires
+        self.analysisType = analysis_type
         self.operating_temp = operating_temp
         self.nominal_temp = nominal_temp
 
@@ -37,6 +39,7 @@ class SimulationMiddleware:
             'Ohm': u_Ohm,
             'kOhm': u_kOhm,
             'F': u_F,
+            'uF': u_uF,
             'H': u_H,
             'Hz': u_Hz,
             'S': u_S,
@@ -47,7 +50,6 @@ class SimulationMiddleware:
         self.subCircuitElements = []
         self.subCircuits = {}
 
-
         # logger = logging.setup_logging()
 
         # if sys.platform == "linux" or sys.platform == "linux2":
@@ -56,7 +58,6 @@ class SimulationMiddleware:
         #     pass
 
         self.signals = self.Signals()
-        print("initing")
         self.circuit = Circuit(self.circuit_name)
 
         # circuit models
@@ -88,6 +89,7 @@ class SimulationMiddleware:
         value = 10
         unit2 = u_V
         print(value @ unit2)
+
     # def init_circuit(self):
     #     logger = logging.setup_logging()
     #
@@ -129,9 +131,9 @@ class SimulationMiddleware:
 
     def test_circuit(self):
         print("creating circuit")
-        self.circuit.V("Vin", "In", self.circuit.gnd, 10@u_V)
-        self.circuit.R(1, "In", "out", 9@u_kOhm)
-        self.circuit.R(2, "out", self.circuit.gnd, 1@u_kOhm)
+        self.circuit.V("Vin", "In", self.circuit.gnd, 10 @ u_V)
+        self.circuit.R(1, "In", "out", 9 @ u_kOhm)
+        self.circuit.R(2, "out", self.circuit.gnd, 1 @ u_kOhm)
 
         print(self.circuit)
         print("analyzing")
@@ -142,9 +144,12 @@ class SimulationMiddleware:
         print(float(analysis.nodes['out']))
 
     def show_specific_data(self, analysis):
-        print(f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}")
-        data = f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}"
-        self.signals.simulationData.emit(data)
+        try:
+            print(f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}")
+            data = f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}"
+            self.signals.simulationData.emit(data)
+        except Exception as e:
+            logger.info(e)
 
     def set_node(self, node, node_name):
         self.selectedNode = node
@@ -154,9 +159,6 @@ class SimulationMiddleware:
         pass
 
     def get_circuit_representation(self, component):
-        print("converting")
-        data = "Converting circuit to netlist"
-        self.signals.simulationData.emit(data)
         node_1, node_2, node_3 = None, None, None
         value = None
         component_unit = None
@@ -206,10 +208,20 @@ class SimulationMiddleware:
             self.circuit.V(component.componentName, node_1, node_2, value_unit)
         elif component.componentType == "Source_AC":
             pass
+        elif component.componentType == "Source_P":
+            self.circuit.PulseVoltageSource(component.componentName, node_1, node_2,
+                                            initial_value=float(component.initialValue) @ u_V, pulsed_value=value_unit,
+                                            pulse_width=float(component.puleWidth) @ u_ms,
+                                            period=float(component.period) @ u_ms)
+
+        elif component.componentType == "Capacitor":
+            self.circuit.C(component.componentName, node_1, node_2, value_unit)
+        elif component.componentType == "Inductor":
+            self.circuit.L(component.componentName, node_1, node_2, value_unit)
         elif component.componentType == "Diode":
-            self.circuit.model(f'MyDiode', 'D', IS=float(component.Is)@u_nA,
-                               RS=float(component.Rs)@u_Ohm, BV=float(component.BV)@u_V,
-                               IBV=float(component.IBV)@u_V, N=float(component.N))
+            self.circuit.model(f'MyDiode', 'D', IS=float(component.Is) @ u_nA,
+                               RS=float(component.Rs) @ u_Ohm, BV=float(component.BV) @ u_V,
+                               IBV=float(component.IBV) @ u_V, N=float(component.N))
             # self.circuit.model('MyDiode', 'D', IS=4.35@u_nA, RS=0.64@u_Ohm, BV=110@u_V,
             #                                       IBV=0.0001@u_V, N=1.906)
             # pass
@@ -235,7 +247,22 @@ class SimulationMiddleware:
         logger.info("Simulating Circuit")
         simulator = self.circuit.simulator(temperature=self.operating_temp, nominal_temperature=self.nominal_temp)
         analysis = simulator.operating_point()
-        print(analysis)
+        if self.analysisType == "Operating Point":
+            analysis = simulator.operating_point()
+        elif self.analysisType == "DC Sweep":
+            try:
+                for component_id in self.components:
+                    component = self.components.get(component_id)
+                    if component.componentType.startswith("Source"):
+                        component.componentName = "SourceDC1"
+                        analysis = simulator.dc(SourceDC1=slice(0, 5, 0.5))
+            except Exception as e:
+                print(e)
+
+        elif self.analysisType == "Transient":
+            pass
+        elif self.analysisType == "AC Analysis":
+            pass
         if self.selectedNode != "":
             try:
                 self.show_specific_data(analysis)
@@ -286,6 +313,5 @@ class SimulationMiddleware:
             pyspice_unit = unit_mapping[unit]
             print(pyspice_unit)
             return pyspice_unit
-
 
 # test_sim = SimulationMiddleware("name", [], 25, 25)

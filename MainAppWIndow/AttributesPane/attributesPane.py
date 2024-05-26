@@ -254,6 +254,8 @@ class AttributesPane(QtWidgets.QWidget):
             layout.addLayout(unit_hbox)
         if self.component.componentType == "Diode":
             self.diode_characteristics(layout)
+        if self.component.componentType == "Source_AC":
+            self.ac_source_characteristics(layout)
         layout.addLayout(action_hbox)
         layout.addWidget(delete_button)
 
@@ -311,6 +313,61 @@ class AttributesPane(QtWidgets.QWidget):
         layout.addLayout(attribute3_hbox)
         layout.addLayout(attribute4_hbox)
         layout.addLayout(attribute5_hbox)
+
+    def ac_source_characteristics(self, layout):
+        # Is
+        attribute1_label = QLabel("Initial Value:")
+        self.attribute1 = QLineEdit(self)
+        self.attribute1.setText(self.component.initialValue)
+        attribute1_unit = QLabel(f"{self.unit_combobox.currentText()}")
+        attribute1_hbox = QHBoxLayout()
+        attribute1_hbox.addWidget(attribute1_label)
+        attribute1_hbox.addWidget(self.attribute1)
+        attribute1_hbox.addWidget(attribute1_unit)
+
+        # Rs
+        attribute2_label = QLabel("Pulse Width:")
+        self.attribute2 = QLineEdit(self)
+        self.attribute2.setText(self.component.pulseWidth)
+        attribute2_unit = QLabel("ms")
+        attribute2_hbox = QHBoxLayout()
+        attribute2_hbox.addWidget(attribute2_label)
+        attribute2_hbox.addWidget(self.attribute2)
+        attribute2_hbox.addWidget(attribute2_unit)
+
+        # BV
+        attribute3_label = QLabel("Period:")
+        self.attribute3 = QLineEdit(self)
+        self.attribute3.setText(self.component.period)
+        attribute3_unit = QLabel("ms")
+        attribute3_hbox = QHBoxLayout()
+        attribute3_hbox.addWidget(attribute3_label)
+        attribute3_hbox.addWidget(self.attribute3)
+        attribute3_hbox.addWidget(attribute3_unit)
+
+        # # IBV
+        # attribute4_label = QLabel("IBV:")
+        # self.attribute4 = QLineEdit(self)
+        # self.attribute4.setText(self.component.IBV)
+        # attribute4_unit = QLabel("V")
+        # attribute4_hbox = QHBoxLayout()
+        # attribute4_hbox.addWidget(attribute4_label)
+        # attribute4_hbox.addWidget(self.attribute4)
+        # attribute4_hbox.addWidget(attribute4_unit)
+        #
+        # # N
+        # attribute5_label = QLabel("N:")
+        # self.attribute5 = QLineEdit(self)
+        # self.attribute5.setText(self.component.N)
+        # attribute5_hbox = QHBoxLayout()
+        # attribute5_hbox.addWidget(attribute5_label)
+        # attribute5_hbox.addWidget(self.attribute5)
+
+        layout.addLayout(attribute1_hbox)
+        layout.addLayout(attribute2_hbox)
+        layout.addLayout(attribute3_hbox)
+        # layout.addLayout(attribute4_hbox)
+        # layout.addLayout(attribute5_hbox)
 
     def wire_data(self, layout):
         # Create a QLabel for the large text
@@ -451,6 +508,10 @@ class AttributesPane(QtWidgets.QWidget):
             self.component.BV = self.attribute3.text()
             self.component.IBV = self.attribute4.text()
             self.component.N = self.attribute5.text()
+        if self.component.componentType == "Source_AC":
+            self.component.initialValue = self.attribute1.text()
+            self.component.pulseWidth = self.attribute2.text()
+            self.component.period = self.attribute3.text()
         self.component.symbol.update()
         # print(self.component.componentName)
 

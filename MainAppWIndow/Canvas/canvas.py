@@ -4,7 +4,7 @@ from typing import List, Tuple
 from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, \
     QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsPathItem, QGraphicsItem, QWidget, QLineEdit, QInputDialog, \
-    QMessageBox
+    QMessageBox, QDialogButtonBox, QComboBox, QDialog
 from PyQt6.QtGui import QPixmap, QPen, QPainter, QColor, QAction, QPainterPath, QBrush
 from PyQt6.QtCore import QSize, Qt, QPoint, QPointF, QObject, pyqtSignal
 
@@ -182,6 +182,8 @@ class MyGraphicsView(QGraphicsView):
 
         # self.scene.addItem(self.nodeTest1)
 
+        self.analysisType = "Operating Point"
+
         self.circuit = None
         self.isSimulating = False
         self.signals = self.Signals()
@@ -190,9 +192,12 @@ class MyGraphicsView(QGraphicsView):
 
     def simulate(self):
         if self.isSimulating:
-            if self.circuitName == "":
-                self.circuitName = self.show_input_dialog(title='Circuit Name', text='Give a name for the circuit:')
-            self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, 25, 25)
+            # if self.circuitName == "":
+            # self.circuitName = self.show_input_dialog(title='Circuit Name', text='Give a name for the circuit:')
+            self.circuitName, self.analysisType = self.show_custom_input_dialog(title='Circuit Name',
+                                                                                text='Give a name for the circuit:')
+            self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
+                                                25, 25)
             self.signals.simulationData.emit(f"Circuit Created: {self.circuitName}")
             self.signals.simulationData.emit("======================")
             try:
@@ -493,6 +498,17 @@ class MyGraphicsView(QGraphicsView):
         self.nodeTest1 = WireDrawing(self.wirePoints)
         self.scene.addItem(self.nodeTest1)
         # self.wirePoints.clear()
+
+    def show_custom_input_dialog(self, title='Name Wire', text='Enter Wire name:'):
+        options = ["Operating Point", "DC Sweep", "Transient", "AC Analysis"]
+        dialog = CustomInputDialog(title, text, options, self)
+        wire_name, combo_value = dialog.getInputs()
+
+        if wire_name and combo_value:
+            QMessageBox.information(self, 'Message', f'Wire {wire_name} added with {combo_value}.')
+            return wire_name, combo_value
+        else:
+            return None, None
 
     def show_input_dialog_circuit(self, title='Name Wire', text='Enter Wire name:'):
         # Create an input dialog
@@ -941,6 +957,43 @@ class MyGraphicsView(QGraphicsView):
     @staticmethod
     def handle_signal(value):
         print(f"Received signal with value: {value}")
+
+
+class CustomInputDialog(QDialog):
+    def __init__(self, title='Name Wire', text='Enter Wire name:', options=None, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+
+        self.layout = QVBoxLayout()
+
+        # Add label and line edit
+        self.label = QLabel(text)
+        self.layout.addWidget(self.label)
+        self.line_edit = QLineEdit(self)
+        self.layout.addWidget(self.line_edit)
+
+        # Add combo box if options are provided
+        self.combo_box = None
+        if options:
+            self.combo_box = QComboBox(self)
+            self.combo_box.addItems(options)
+            self.layout.addWidget(self.combo_box)
+
+        # Add standard dialog buttons (Ok and Cancel)
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+                                           self)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        self.layout.addWidget(self.button_box)
+
+        self.setLayout(self.layout)
+
+    def getInputs(self):
+        if self.exec() == QDialog.DialogCode.Accepted:
+            text = self.line_edit.text().strip()
+            combo_value = self.combo_box.currentText() if self.combo_box else None
+            return text, combo_value
+        return None, None
 
 
 class InputDialog(QWidget):
