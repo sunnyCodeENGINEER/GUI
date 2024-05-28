@@ -11,6 +11,8 @@ from MainAppWIndow.ResultsandErrorPane.ResultsandErrorPane import LogConsole
 
 from Components.logger import qt_log_handler
 # from Components.logger.qt_handler import QtLogHandler
+from Middleware.resultPlot import MplCanvas
+
 
 class MainWindow(QMainWindow):
     class Signals(QObject):
@@ -20,18 +22,18 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.layout = None
         self.attributesPane = None
-        # self.layout = None
-        # self.canvas = None
-        # self.componentPane = None
         self.componentPane = ComponentsPane()  # component pane
         self.canvas = MyGraphicsView()  # canvas
+        self.plotView: QWidget = MplCanvas(width=5, height=5, dpi=100)
         self.attributesPane = AttributesPane()
         self.logConsole = LogConsole()
         self.attributes_pane_and_log_console = QVBoxLayout()
+        self.canvas_and_plot = QVBoxLayout()
         self.init_ui()
         self._create_toolbar()
         self._connect_signals()
         self.signals = self.Signals()
+        self.isSimulating = False
         # connect canvas to main window simulate signal
         self.canvas.signals.simulate.connect(self.signals.simulate)
 
@@ -41,18 +43,17 @@ class MainWindow(QMainWindow):
         self.setMinimumWidth(1000)
         self.setMinimumHeight(800)
 
-        # self.componentPane = ComponentsPane()  # component pane
-        # self.canvas = MyGraphicsView()  # canvas
-        # self.attributesPane = AttributesPane()
-
         self.layout = QHBoxLayout()
         self.layout.setContentsMargins(5, 5, 5, 5)
         self.layout.setSpacing(5)
         self.layout.addWidget(self.componentPane, 1)
-        self.layout.addWidget(self.canvas, 4)
+        # self.layout.addWidget(self.canvas, 4)
+        self.canvas_and_plot.addWidget(self.canvas)
+
+        self.canvas_and_plot.addWidget(self.plotView)
+        self.layout.addLayout(self.canvas_and_plot, 4)
         self.attributes_pane_and_log_console.addWidget(self.attributesPane, 3)
         self.attributes_pane_and_log_console.addWidget(self.logConsole, 1)
-        # self.layout.addWidget(self.attributesPane, 1)
         self.layout.addLayout(self.attributes_pane_and_log_console)
 
         container = QWidget()

@@ -17,7 +17,7 @@ from Components.logger import logger
 
 class SimulationMiddleware:
     class Signals(QObject):
-        # simulationResult = pyqtSignal(dict)
+        simulationResult = pyqtSignal(dict)
         simulationData = pyqtSignal(str)
 
     def __init__(self, circuit_name, canvas_components, canvas_wires, analysis_type, operating_temp, nominal_temp):
@@ -151,6 +151,10 @@ class SimulationMiddleware:
         except Exception as e:
             logger.info(e)
 
+        if self.analysisType != "Operating Point":
+            result = self.format_data(analysis)
+            self.signals.simulationResult.emit(result)
+
     def set_node(self, node, node_name):
         self.selectedNode = node
         self.selectedNodeName = node_name
@@ -238,9 +242,6 @@ class SimulationMiddleware:
             except Exception as e:
                 print(e)
 
-        # simulator = self.circuit.simulator(temperature=self.operating_temp, nominal_temperature=self.nominal_temp)
-        # analysis = simulator.operating_point()
-        # print(analysis)
         self.signals.simulationData.emit(data)
 
     def run_analysis(self):
@@ -287,6 +288,8 @@ class SimulationMiddleware:
         for node in analysis.nodes.values():
             data_label = f"{str(node)}"  # node name
             simulation_result[data_label] = np.array(node)
+
+        return simulation_result
 
         # self.signals.simulationResult.emit(simulation_result)
 
