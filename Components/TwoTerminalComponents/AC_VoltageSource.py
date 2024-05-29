@@ -6,9 +6,7 @@ class ACVoltageSource(TwoTerminalComponent):
         super(ACVoltageSource, self).__init__(unique_id, name, "../Assets/symbols/AC_source.png")
 
         self.componentUnit = "V"
-        self.initialValue = "0"
-        self.pulseWidth = "10"
-        self.period = "20"
+        self.frequency = "100"
         # self.componentName = "AC Voltage Source"
         self.componentType = "Source_AC"
         self.units = ["V", "kV"]

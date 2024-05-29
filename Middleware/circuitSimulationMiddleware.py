@@ -15,9 +15,18 @@ from Components.logger import logger
 # from Components.allTerminalComponent import OneTerminalComponent, ThreeTerminalComponent
 
 
+class ResultPlot:
+    def __init__(self, plot_label, x_axis, y_axis, x_axis_label, y_axis_label):
+        self.plot_label = plot_label
+        self.x_axis = x_axis
+        self.x_axis_label = x_axis_label
+        self.y_axis = y_axis
+        self.y_axis_label = y_axis_label
+
+
 class SimulationMiddleware:
     class Signals(QObject):
-        simulationResult = pyqtSignal(dict)
+        simulationResult = pyqtSignal(ResultPlot)
         simulationData = pyqtSignal(str)
 
     def __init__(self, circuit_name, canvas_components, canvas_wires, analysis_type, operating_temp, nominal_temp):
@@ -153,7 +162,17 @@ class SimulationMiddleware:
 
         if self.analysisType != "Operating Point":
             result = self.format_data(analysis)
-            self.signals.simulationResult.emit(result)
+            print(f"result {result}")
+            result_plot = ResultPlot("", [], [], "", "")
+            if self.analysisType == "Transient":
+                result_plot = ResultPlot("Transient Analysis", np.array(analysis.time),
+                                         np.array(analysis.nodes[self.selectedNode]), "Time", "Voltage")
+                pass
+            elif self.analysisType == "DC Sweep":
+                result_plot = ResultPlot("DC Sweep", np.array(analysis.time),
+                                         np.array(analysis.nodes[self.selectedNode]), "Time", "Voltage")
+                pass
+            self.signals.simulationResult.emit(result_plot)
 
     def set_node(self, node, node_name):
         self.selectedNode = node
@@ -210,6 +229,10 @@ class SimulationMiddleware:
 
         elif component.componentType == "Source_DC":
             self.circuit.V(component.componentName, node_1, node_2, value_unit)
+            if self.analysisType == "DC Sweep":
+                self.circuit.V("SourceDC1", node_1, node_2, value_unit)
+            else:
+                self.circuit.V(component.componentName, node_1, node_2, value_unit)
         elif component.componentType == "Source_AC":
             pass
         elif component.componentType == "Source_P":
@@ -254,8 +277,9 @@ class SimulationMiddleware:
             try:
                 for component_id in self.components:
                     component = self.components.get(component_id)
-                    if component.componentType.startswith("Source"):
-                        component.componentName = "SourceDC1"
+                    # if component.componentType.startswith("Source"):
+                    if component.componentName == "Source_DC-1":
+                        # component.componentID = "SourceDC1"
                         analysis = simulator.dc(SourceDC1=slice(0, 5, 0.5))
             except Exception as e:
                 print(e)
@@ -317,4 +341,6 @@ class SimulationMiddleware:
             print(pyspice_unit)
             return pyspice_unit
 
+
 # test_sim = SimulationMiddleware("name", [], 25, 25)
+

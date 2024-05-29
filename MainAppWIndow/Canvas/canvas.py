@@ -17,7 +17,7 @@ from Components.symbolWithTwoTerminals import SymbolWithTwoTerminals
 from Components.symbolWithOneTerminal import SymbolWithOneTerminal
 from Components.allTerminalComponent import OneTerminalComponent, ThreeTerminalComponent, TwoTerminalComponent
 from MainAppWIndow.Canvas.CanvasGrid.grid_scene import GridScene
-from Middleware.circuitSimulationMiddleware import SimulationMiddleware
+from Middleware.circuitSimulationMiddleware import SimulationMiddleware, ResultPlot
 
 
 class MovingObject(QGraphicsRectItem):
@@ -130,7 +130,7 @@ class MyGraphicsView(QGraphicsView):
         wireDeselected = pyqtSignal()
         simulate = pyqtSignal()
         simulationData = pyqtSignal(str)
-        simulationResult = pyqtSignal(dict)
+        simulationResult = pyqtSignal(ResultPlot)
 
     def __init__(self):
         super().__init__()
@@ -810,6 +810,7 @@ class CustomInputDialog(QDialog):
         self.layout.addWidget(self.button_box)
 
         self.setLayout(self.layout)
+
 
     def getInputs(self):
         if self.exec() == QDialog.DialogCode.Accepted:
