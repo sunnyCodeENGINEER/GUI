@@ -1,4 +1,5 @@
 import numpy as np
+from array import array
 import matplotlib.pyplot as plt
 import sys
 
@@ -10,6 +11,7 @@ from PySpice.Unit import *
 
 from PyQt6.QtCore import pyqtSignal, QObject
 from Components.logger import logger
+# from Middleware.resultPlot import plotView
 
 
 # from Components.allTerminalComponent import OneTerminalComponent, ThreeTerminalComponent
@@ -26,7 +28,7 @@ class ResultPlot:
 
 class SimulationMiddleware:
     class Signals(QObject):
-        simulationResult = pyqtSignal(ResultPlot)
+        simulationResult = pyqtSignal(np.ndarray)
         simulationData = pyqtSignal(str)
 
     def __init__(self, circuit_name, canvas_components, canvas_wires, analysis_type, operating_temp, nominal_temp):
@@ -68,6 +70,7 @@ class SimulationMiddleware:
 
         self.signals = self.Signals()
         self.circuit = Circuit(self.circuit_name)
+        self.result_plot = None
 
         # circuit models
         # self.circuit.model('MyDiode', 'D', IS=4.35 @ u_nA, RS=0.64 @ u_Ohm, BV=110 @ U_V,
@@ -92,12 +95,29 @@ class SimulationMiddleware:
             logger.info("Creating PySpice Circuit")
             self.run_analysis()
         except Exception as e:
+            print("error here")
             print(e)
             print(self.components.keys())
 
-        value = 10
-        unit2 = u_V
-        print(value @ unit2)
+        # if self.analysisType == "Transient":
+        #     try:
+        #         self.run_analysis()
+        #     except Exception as e:
+        #         print(e)
+
+        self.signals.simulationResult.connect(self.handle)
+
+        if self.result_plot is not None:
+            # self.signals.simulationResult.emit(self.result_plot)
+            self.emit_result()
+            # print(self.signals.simulationResult.emit(self.result_plot))
+
+    def handle(self, results):
+        print(f"emitting: {results}")
+
+    def emit_result(self):
+        print(self.result_plot)
+        self.signals.simulationResult.emit(self.result_plot.x_axis)
 
     # def init_circuit(self):
     #     logger = logging.setup_logging()
@@ -153,6 +173,8 @@ class SimulationMiddleware:
         print(float(analysis.nodes['out']))
 
     def show_specific_data(self, analysis):
+        if self.analysisType == "Transient":
+            return
         try:
             print(f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}")
             data = f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}"
@@ -172,7 +194,7 @@ class SimulationMiddleware:
                 result_plot = ResultPlot("DC Sweep", np.array(analysis.time),
                                          np.array(analysis.nodes[self.selectedNode]), "Time", "Voltage")
                 pass
-            self.signals.simulationResult.emit(result_plot)
+            self.signals.simulationResult.emit(np.array(analysis.time))
 
     def set_node(self, node, node_name):
         self.selectedNode = node
@@ -228,18 +250,21 @@ class SimulationMiddleware:
             self.circuit.R(component.componentName, node_1, node_2, value_unit)
 
         elif component.componentType == "Source_DC":
-            self.circuit.V(component.componentName, node_1, node_2, value_unit)
+            # self.circuit.V(component.componentName, node_1, node_2, value_unit)
             if self.analysisType == "DC Sweep":
                 self.circuit.V("SourceDC1", node_1, node_2, value_unit)
             else:
                 self.circuit.V(component.componentName, node_1, node_2, value_unit)
         elif component.componentType == "Source_AC":
+            self.circuit.SinusoidalVoltageSource(component.componentName, node_1, node_2, amplitude=value_unit,
+                                                 frequency=float(component.frequency)@u_Hz)
             pass
         elif component.componentType == "Source_P":
             self.circuit.PulseVoltageSource(component.componentName, node_1, node_2,
                                             initial_value=float(component.initialValue) @ u_V, pulsed_value=value_unit,
                                             pulse_width=float(component.puleWidth) @ u_ms,
                                             period=float(component.period) @ u_ms)
+            print(self.circuit)
 
         elif component.componentType == "Capacitor":
             self.circuit.C(component.componentName, node_1, node_2, value_unit)
@@ -254,18 +279,18 @@ class SimulationMiddleware:
             # pass
             self.circuit.Diode(component.componentName, node_1, node_2, model='MyDiode')
 
-        if not is_error:
-            data2 = "There was an issue.\nPlease check your circuit diagram."
-            self.signals.simulationData.emit(data2)
+        # if not is_error:
+        #     data2 = "There was an issue.\nPlease check your circuit diagram."
+        #     self.signals.simulationData.emit(data2)
         print(self.circuit)
-        for line in self.circuit:
-            try:
-                self.signals.simulationData.emit(line)
-                print(line)
-            except Exception as e:
-                print(e)
+        # for line in self.circuit:
+        #     try:
+        #         self.signals.simulationData.emit(line)
+        #         print(line)
+        #     except Exception as e:
+        #         print(e)
 
-        self.signals.simulationData.emit(data)
+        # self.signals.simulationData.emit(data)
 
     def run_analysis(self):
         logger.info("Simulating Circuit")
@@ -285,6 +310,14 @@ class SimulationMiddleware:
                 print(e)
 
         elif self.analysisType == "Transient":
+            analysis = simulator.transient(step_time=0.001, end_time=0.01)
+            result_plot = ResultPlot("Transient Analysis", np.array(analysis.time),
+                                     np.array((analysis["wire-1"])), "Time", "Voltage")
+            print(result_plot.x_axis)
+            self.result_plot = result_plot
+            # plotView.plot(self.result_plot.x_axis, self.result_plot.y_axis)
+            self.signals.simulationResult.emit(self.result_plot.x_axis)
+            return self.result_plot
             pass
         elif self.analysisType == "AC Analysis":
             pass
@@ -293,6 +326,8 @@ class SimulationMiddleware:
                 self.show_specific_data(analysis)
             except Exception as e:
                 print(e)
+
+        print(analysis)
 
     def parent_connection(self, wire_id):
         print("parenting")

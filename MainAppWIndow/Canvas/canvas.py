@@ -1,6 +1,8 @@
 import typing
+from array import array
 from typing import List, Tuple
 
+import numpy
 from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, \
     QGraphicsEllipseItem, QGraphicsRectItem, QGraphicsPathItem, QGraphicsItem, QWidget, QLineEdit, QInputDialog, \
@@ -77,9 +79,6 @@ class CustomPathItem(QGraphicsPathItem):
         self.setBrush(Qt.GlobalColor.blue)
         self.pen().setWidth(10)
         self.pen = QPen()
-        # self.pen.setWidth(50)
-        # self.setFlag(QGraphicsItem.ItemIsSelectable)
-        # self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsMovable)
         self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsSelectable)
 
@@ -169,37 +168,48 @@ class MyGraphicsView(QGraphicsView):
         self.point1 = None
         self.point2 = None
 
-        # will all go!
-        # self.moveObject = MovingObject(50, 50, 40)
-
         points = [QPoint(20, 20), QPoint(20, 80), QPoint(20, 100)]
         self.nodeTest1 = WireDrawing(points)
 
         self.analysisType = "Operating Point"
 
-        self.circuit = None
+        self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
+                                                25, 25)
         self.isSimulating = False
+        self.simulationResult = None
         self.signals = self.Signals()
         self.signals.simulate.connect(self.simulate)
+        self.circuit.signals.simulationData.connect(self.data_received)
+        # self.circuit.signals.simulationResult.connect(self.result_received)
 
     def simulate(self):
         if self.isSimulating:
+
             # if self.circuitName == "":
             # self.circuitName = self.show_input_dialog(title='Circuit Name', text='Give a name for the circuit:')
             self.circuitName, self.analysisType = self.show_custom_input_dialog(title='Circuit Name',
                                                                                 text='Give a name for the circuit:')
             self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
                                                 25, 25)
+            if self.analysisType == "Transient":
+                try:
+                    self.simulationResult = self.circuit.run_analysis()
+                    self.result_received()
+                except Exception as e:
+                    print(e)
+            self.circuit.signals.simulationResult.connect(self.result_received)
             self.signals.simulationData.emit(f"Circuit Created: {self.circuitName}")
             self.signals.simulationData.emit("======================")
-            try:
-                self.circuit.signals.simulationData.connect(self.data_received)
-                self.circuit.signals.simulationResult.connect(self.result_received)
-            except Exception as e:
-                print(e)
+            # try:
+            #     self.circuit.signals.simulationData.connect(self.data_received)
+            #     self.circuit.signals.simulationResult.connect(self.result_received)
+            # except Exception as e:
+            #     print(e)
 
-    def result_received(self, results):
-        self.signals.simulationResult.emit(results)
+    def result_received(self):
+        print("results received")
+        print(self.simulationResult.x_axis)
+        self.signals.simulationResult.emit(self.simulationResult)
 
     def data_received(self, text):
         self.signals.simulationData.emit(text)
@@ -460,6 +470,7 @@ class MyGraphicsView(QGraphicsView):
         wire_name, combo_value = dialog.getInputs()
 
         if wire_name and combo_value:
+
             QMessageBox.information(self, 'Message', f'Wire {wire_name} added with {combo_value}.')
             return wire_name, combo_value
         else:
@@ -810,7 +821,6 @@ class CustomInputDialog(QDialog):
         self.layout.addWidget(self.button_box)
 
         self.setLayout(self.layout)
-
 
     def getInputs(self):
         if self.exec() == QDialog.DialogCode.Accepted:

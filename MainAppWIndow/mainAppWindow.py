@@ -11,6 +11,7 @@ from MainAppWIndow.ResultsandErrorPane.ResultsandErrorPane import LogConsole
 
 from Components.logger import qt_log_handler
 # from Components.logger.qt_handler import QtLogHandler
+from Middleware.circuitSimulationMiddleware import ResultPlot
 from Middleware.resultPlot import MplCanvas
 
 
@@ -24,7 +25,8 @@ class MainWindow(QMainWindow):
         self.attributesPane = None
         self.componentPane = ComponentsPane()  # component pane
         self.canvas = MyGraphicsView()  # canvas
-        self.plotView: QWidget = MplCanvas(width=5, height=5, dpi=100)
+        self.plotData = ResultPlot("", [], [], "", "")
+        self.plotView = MplCanvas(self.plotData, width=5, height=5, dpi=100)
         self.attributesPane = AttributesPane()
         self.logConsole = LogConsole()
         self.attributes_pane_and_log_console = QVBoxLayout()
@@ -34,6 +36,7 @@ class MainWindow(QMainWindow):
         self._connect_signals()
         self.signals = self.Signals()
         self.isSimulating = False
+
         # connect canvas to main window simulate signal
         self.canvas.signals.simulate.connect(self.signals.simulate)
 
@@ -49,8 +52,9 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.componentPane, 1)
         # self.layout.addWidget(self.canvas, 4)
         self.canvas_and_plot.addWidget(self.canvas)
-
+        # if self.plotData:
         self.canvas_and_plot.addWidget(self.plotView)
+        # self.canvas_and_plot.addWidget(plotView)
         self.layout.addLayout(self.canvas_and_plot, 4)
         self.attributes_pane_and_log_console.addWidget(self.attributesPane, 3)
         self.attributes_pane_and_log_console.addWidget(self.logConsole, 1)
@@ -64,6 +68,7 @@ class MainWindow(QMainWindow):
     def _connect_signals(self):
         # # connect canvas to main window simulate signal
         self.canvas.signals.simulationData.connect(self.on_data_received)
+        self.canvas.signals.simulationResult.connect(self.result_received)
         # connect canvas component select to attribute pane
         self.canvas.signals.componentSelected.connect(self.on_canvas_component_select)
         self.canvas.signals.componentDeselected.connect(self.on_canvas_component_deselect)
@@ -77,6 +82,15 @@ class MainWindow(QMainWindow):
 
         # connect log signal to results and error pane
         qt_log_handler.signals.log.connect(self.logConsole.on_log)
+
+    def result_received(self, result):
+        print("results here")
+        # self.plotView.plot(result.x_axis, result.y_axis)
+        #
+        self.plotView = MplCanvas(result)
+        self.plotView.update()
+        # self.update()
+        pass
 
     def _create_toolbar(self):
         """Create a toolbar for the main window"""
