@@ -11,6 +11,8 @@ from PySpice.Unit import *
 
 from PyQt6.QtCore import pyqtSignal, QObject
 from Components.logger import logger
+
+
 # from Middleware.resultPlot import plotView
 
 
@@ -31,13 +33,17 @@ class SimulationMiddleware:
         simulationResult = pyqtSignal(np.ndarray)
         simulationData = pyqtSignal(str)
 
-    def __init__(self, circuit_name, canvas_components, canvas_wires, analysis_type, operating_temp, nominal_temp):
+    def __init__(self, circuit_name, canvas_components, canvas_wires, analysis_type, var_1, var_2, operating_temp,
+                 nominal_temp):
         self.circuit_name = circuit_name
         self.components = canvas_components
         self.wires = canvas_wires
         self.analysisType = analysis_type
         self.operating_temp = operating_temp
         self.nominal_temp = nominal_temp
+
+        self.var_1 = var_1
+        self.var_2 = var_2
 
         self.selectedNode: str = ""
         self.selectedNodeName: str = ""
@@ -257,7 +263,7 @@ class SimulationMiddleware:
                 self.circuit.V(component.componentName, node_1, node_2, value_unit)
         elif component.componentType == "Source_AC":
             self.circuit.SinusoidalVoltageSource(component.componentName, node_1, node_2, amplitude=value_unit,
-                                                 frequency=float(component.frequency)@u_Hz)
+                                                 frequency=float(component.frequency) @ u_Hz)
             pass
         elif component.componentType == "Source_P":
             self.circuit.PulseVoltageSource(component.componentName, node_1, node_2,
@@ -299,6 +305,19 @@ class SimulationMiddleware:
         if self.analysisType == "Operating Point":
             analysis = simulator.operating_point()
         elif self.analysisType == "DC Sweep":
+            step_time, end_value = None, None
+            try:
+                step_time = float(self.var_1)
+                print(step_time)
+            except Exception as e:
+                logger.info(e)
+                pass
+            try:
+                end_value = float(self.var_2)
+                print(end_value)
+            except Exception as e:
+                logger.info(e)
+                pass
             try:
                 for component_id in self.components:
                     component = self.components.get(component_id)
@@ -306,20 +325,60 @@ class SimulationMiddleware:
                     if component.componentName == "Source_DC-1":
                         # component.componentID = "SourceDC1"
                         analysis = simulator.dc(SourceDC1=slice(0, 5, 0.5))
+                        result_plot = ResultPlot("DC Sweep Analysis", np.array(analysis.time),
+                                                 np.array((analysis["wire-1"])), "Time", "Voltage")
+                        self.result_plot = result_plot
+                        self.signals.simulationResult.emit(self.result_plot.x_axis)
+                        return self.result_plot
             except Exception as e:
                 print(e)
 
         elif self.analysisType == "Transient":
-            analysis = simulator.transient(step_time=0.001, end_time=0.01)
+            step_time, end_time = None, None
+            try:
+                step_time = float(self.var_1)
+                print(step_time)
+            except Exception as e:
+                logger.info(e)
+                pass
+            try:
+                end_time = float(self.var_2)
+                print(end_time)
+            except Exception as e:
+                logger.info(e)
+                pass
+
+            analysis = simulator.transient(step_time=step_time, end_time=end_time)
             result_plot = ResultPlot("Transient Analysis", np.array(analysis.time),
                                      np.array((analysis["wire-1"])), "Time", "Voltage")
-            print(result_plot.x_axis)
+            # print(result_plot.x_axis)
             self.result_plot = result_plot
             # plotView.plot(self.result_plot.x_axis, self.result_plot.y_axis)
             self.signals.simulationResult.emit(self.result_plot.x_axis)
             return self.result_plot
             pass
         elif self.analysisType == "AC Analysis":
+            start_freq, end_freq = None, None
+            try:
+                start_freq = float(self.var_1)
+                print(start_freq)
+            except Exception as e:
+                logger.info(e)
+                pass
+            try:
+                end_freq = float(self.var_2)
+                print(end_freq)
+            except Exception as e:
+                logger.info(e)
+                pass
+
+            analysis = simulator.ac(start_frequency=start_freq@u_Hz, stop_frequency=end_freq@u_Hz, variation='dec',
+                                    number_of_points=10)
+            result_plot = ResultPlot("AC Analysis", np.array(analysis.time),
+                                     np.array((analysis["wire-1"])), "Time", "Voltage")
+            self.result_plot = result_plot
+            self.signals.simulationResult.emit(self.result_plot.x_axis)
+            return self.result_plot
             pass
         if self.selectedNode != "":
             try:
@@ -376,6 +435,4 @@ class SimulationMiddleware:
             print(pyspice_unit)
             return pyspice_unit
 
-
 # test_sim = SimulationMiddleware("name", [], 25, 25)
-

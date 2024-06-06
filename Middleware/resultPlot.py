@@ -28,13 +28,14 @@ class MplCanvas(QWidget):
         self.plot(result.x_axis, result.y_axis)
 
     def plot(self, x, y):
-        print("plotting")
-        print(f"x: {x}")
-        print(f"y: {y}")
+        # print("plotting")
+        # print(f"x: {x}")
+        # print(f"y: {y}")
         self.axes.clear()
         self.axes.plot(x, y)
         self.canvas.draw()  # Update the canvas to reflect the changes
         self.canvas.flush_events()  # Ensure the GUI is updated if necessary
+        self.show()
 
 # class MplCanvas(QWidget):
 #     def __init__(self, result: ResultPlot, parent=None, width=5, height=5, dpi=100):

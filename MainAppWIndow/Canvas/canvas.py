@@ -174,7 +174,10 @@ class MyGraphicsView(QGraphicsView):
         self.analysisType = "Operating Point"
 
         self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
-                                                25, 25)
+                                            0.01, 0.1, 25, 25)
+
+        self.var_1 = None
+        self.var_2 = None
         self.isSimulating = False
         self.simulationResult = None
         self.signals = self.Signals()
@@ -189,9 +192,19 @@ class MyGraphicsView(QGraphicsView):
             # self.circuitName = self.show_input_dialog(title='Circuit Name', text='Give a name for the circuit:')
             self.circuitName, self.analysisType = self.show_custom_input_dialog(title='Circuit Name',
                                                                                 text='Give a name for the circuit:')
-            self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
-                                                25, 25)
+            var_1, var_2, var_3 = None, None, None
             if self.analysisType == "Transient":
+                var_1, var_2 = self.show_analysis_input_dialog()
+                pass
+            if self.analysisType == "AC Analysis":
+                var_1, var_2 = self.show_analysis_input_dialog(text="Start Frequency:", text2="Stop Frequency:")
+                pass
+            if self.analysisType == "DC Sweep":
+                pass
+
+            self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
+                                                var_1, var_2, 25, 25)
+            if self.analysisType == "Transient" or self.analysisType == "AC Analysis":
                 try:
                     self.simulationResult = self.circuit.run_analysis()
                     self.result_received()
@@ -473,6 +486,17 @@ class MyGraphicsView(QGraphicsView):
 
             QMessageBox.information(self, 'Message', f'Wire {wire_name} added with {combo_value}.')
             return wire_name, combo_value
+        else:
+            return None, None
+
+    def show_analysis_input_dialog(self, title='Name Wire', text='Step Time:', text2='End Time:'):
+        dialog = AnalysisInputDialog(text=text, text2=text2)
+        var_1, var_2 = dialog.getInputs()
+
+        if var_1 and var_2:
+
+            QMessageBox.information(self, 'Message', f'Done.')
+            return var_1, var_2
         else:
             return None, None
 
@@ -827,6 +851,43 @@ class CustomInputDialog(QDialog):
             text = self.line_edit.text().strip()
             combo_value = self.combo_box.currentText() if self.combo_box else None
             return text, combo_value
+        return None, None
+
+
+class AnalysisInputDialog(QDialog):
+    def __init__(self, title='Analysis Parameters', text='Step Time:', text2='End Time:', parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+
+        self.layout = QVBoxLayout()
+
+        # Add label and line edit
+        self.label = QLabel(text)
+        self.layout.addWidget(self.label)
+        self.line_edit = QLineEdit(self)
+        self.layout.addWidget(self.line_edit)
+
+        # Add label and line edit
+        self.label2 = QLabel(text2)
+        self.layout.addWidget(self.label2)
+        self.line_edit2 = QLineEdit(self)
+        self.layout.addWidget(self.line_edit2)
+
+        # Add standard dialog buttons (Ok and Cancel)
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+                                           self)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        self.layout.addWidget(self.button_box)
+
+        self.setLayout(self.layout)
+
+    def getInputs(self):
+        if self.exec() == QDialog.DialogCode.Accepted:
+            text = self.line_edit.text().strip()
+            text2 = self.line_edit2.text().strip()
+            # combo_value = self.combo_box.currentText() if self.combo_box else None
+            return text, text2
         return None, None
 
 
