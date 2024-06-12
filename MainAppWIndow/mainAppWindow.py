@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
         self.canvas_and_plot.addWidget(self.canvas)
         # if self.plotData:
         self.canvas_and_plot.addWidget(self.plotView)
+        self.plotView.hide()
         # self.canvas_and_plot.addWidget(plotView)
         self.layout.addLayout(self.canvas_and_plot, 4)
         self.attributes_pane_and_log_console.addWidget(self.attributesPane, 3)
@@ -87,8 +88,13 @@ class MainWindow(QMainWindow):
         print("results here")
         # self.plotView.plot(result.x_axis, result.y_axis)
         #
-        self.plotView = MplCanvas(result)
-        self.plotView.update()
+        self.plotView.show()
+        self.plotView.axes.clear()
+        self.plotView.axes.plot(result.x_axis, result.y_axis)
+        # self.plotView = MplCanvas(result)
+        self.plotView.canvas.draw()
+
+        # self.plotView.update()
         # self.update()
         pass
 
@@ -175,6 +181,10 @@ class MainWindow(QMainWindow):
     def on_simulate(self, state: bool):
         # self.signals.simulate.emit()
         self.canvas.on_simulate(state)
+        if state:
+            self.plotView.show()
+        else:
+            self.plotView.hide()
 
     def on_simulation_setting(self):
         pass

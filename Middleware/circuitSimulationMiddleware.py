@@ -347,15 +347,17 @@ class SimulationMiddleware:
             except Exception as e:
                 logger.info(e)
                 pass
-
-            analysis = simulator.transient(step_time=step_time, end_time=end_time)
-            result_plot = ResultPlot("Transient Analysis", np.array(analysis.time),
-                                     np.array((analysis["wire-1"])), "Time", "Voltage")
-            # print(result_plot.x_axis)
-            self.result_plot = result_plot
-            # plotView.plot(self.result_plot.x_axis, self.result_plot.y_axis)
-            self.signals.simulationResult.emit(self.result_plot.x_axis)
-            return self.result_plot
+            try:
+                # call function here
+                analysis_node = self.generate_component_source_connection("Source_AC")
+                analysis = simulator.transient(step_time=step_time, end_time=end_time)
+                result_plot = ResultPlot("Transient Analysis", np.array(analysis.time),
+                                         np.array((analysis[analysis_node])), "Time", "Voltage")
+                self.result_plot = result_plot
+                self.signals.simulationResult.emit(self.result_plot.x_axis)
+                return self.result_plot
+            except Exception as e:
+                logger.info(e)
             pass
         elif self.analysisType == "AC Analysis":
             start_freq, end_freq = None, None
@@ -387,6 +389,32 @@ class SimulationMiddleware:
                 print(e)
 
         print(analysis)
+
+    def generate_component_source_connection(self, component_type):
+        logger.info("getting ac node")
+        # find a way to get correct wire connected to ac voltage source
+        # filter for 'Source_AC'
+        existing_ids = self.components.keys()
+        filtered_ids = list(filter(lambda x: x.startswith(component_type), existing_ids))
+        # arrange in ascending order
+        # if there are no existing IDs, return 0
+        print(filtered_ids)
+        if len(filtered_ids) == 0:
+            return ""
+        # sort the IDs in ascending order
+        filtered_ids.sort()
+        # get first element and use terminal that isn't connected to ground else move to next source
+        index = 0
+        while index < len(filtered_ids):
+            component = self.components.get(filtered_ids[index])
+            print(f"component Name = {component.componentName}")
+            if not component.terminal1To.startswith("ground"):
+                return component.terminal1To
+                pass
+            elif not component.terminal2To.startswith("ground"):
+                return component.terminal2To
+                pass
+            index += 1
 
     def parent_connection(self, wire_id):
         print("parenting")
