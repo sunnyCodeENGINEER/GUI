@@ -394,8 +394,6 @@ class MyGraphicsView(QGraphicsView):
             wire_name = _.wireName
             self.circuit.set_node(wire_id, wire_name)
             self.circuit.run_analysis()
-        # print("Thesis Maame")
-        # self.selectedComponent = self.canvasComponents.get(component_id)
 
     def wire_deselected(self):
         # emit component with the selected id to attribute pane

@@ -183,10 +183,13 @@ class SimulationMiddleware:
             return
         try:
             print(f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}")
-            data = f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}"
+            data = f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])} V"
+            logger.info(data)
             self.signals.simulationData.emit(data)
         except Exception as e:
             logger.info(e)
+            data = f"{self.selectedNodeName} - 0 V"
+            logger.info(data)
 
         if self.analysisType != "Operating Point":
             result = self.format_data(analysis)

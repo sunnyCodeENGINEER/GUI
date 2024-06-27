@@ -1,3 +1,4 @@
+import numpy as np
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from matplotlib.backends.backend_template import FigureCanvas
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
@@ -8,6 +9,9 @@ from Middleware.circuitSimulationMiddleware import ResultPlot
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+
+import matplotlib.pyplot as plt
+from PySpice.Plot.BodeDiagram import bode_diagram
 
 
 class MplCanvas(QWidget):
@@ -25,7 +29,7 @@ class MplCanvas(QWidget):
         layout.addWidget(self.canvas)
 
         # Plot the initial data
-        self.plot(result.x_axis, result.y_axis)
+        # self.plot(result.x_axis, result.y_axis)
 
     def plot(self, x, y):
         # print("plotting")
@@ -36,4 +40,16 @@ class MplCanvas(QWidget):
         self.canvas.draw()  # Update the canvas to reflect the changes
         self.canvas.flush_events()  # Ensure the GUI is updated if necessary
         self.show()
+
+    def plot_ac(self, frequency, node):
+        bode_diagram(axes=self.axes,
+                     frequency=frequency,
+                     gain=20*np.log10(np.absolute(node)),
+                     phase=np.angle(node, deg=False),
+                     marker='-',
+                     color='blue',
+                     linestyle='-'
+                     )
+        plt.tight_layout()
+        # self.show()
 

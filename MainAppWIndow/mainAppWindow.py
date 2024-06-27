@@ -88,6 +88,9 @@ class MainWindow(QMainWindow):
         print("results here")
         # self.plotView.plot(result.x_axis, result.y_axis)
         #
+        if self.canvas.analysisType == "Operating Point":
+            return
+
         self.plotView.show()
         self.plotView.axes.clear()
         self.plotView.axes.plot(result.x_axis, result.y_axis)
@@ -182,7 +185,9 @@ class MainWindow(QMainWindow):
         # self.signals.simulate.emit()
         self.canvas.on_simulate(state)
         if state:
-            self.plotView.show()
+            if self.canvas.analysisType != "Operating Point":
+                self.plotView.show()
+
         else:
             self.plotView.hide()
 
