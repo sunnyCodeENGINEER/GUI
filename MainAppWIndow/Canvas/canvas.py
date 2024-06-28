@@ -129,7 +129,7 @@ class MyGraphicsView(QGraphicsView):
         wireDeselected = pyqtSignal()
         simulate = pyqtSignal()
         simulationData = pyqtSignal(str)
-        simulationResult = pyqtSignal(ResultPlot)
+        simulationResult = pyqtSignal(list)
 
     def __init__(self):
         super().__init__()
@@ -221,7 +221,7 @@ class MyGraphicsView(QGraphicsView):
 
     def result_received(self):
         print("results received")
-        print(self.simulationResult.x_axis)
+        print(self.simulationResult)
         self.signals.simulationResult.emit(self.simulationResult)
 
     def data_received(self, text):

@@ -1,3 +1,4 @@
+import numpy as np
 from PyQt6.QtCore import QSize, QObject, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QApplication, QToolBar, QVBoxLayout, QLineEdit, \
@@ -93,8 +94,20 @@ class MainWindow(QMainWindow):
 
         self.plotView.show()
         self.plotView.axes.clear()
-        self.plotView.axes.plot(result.x_axis, result.y_axis)
+        print("===================")
+        for node in result:
+            # self.plotView.axes.plot(result.x_axis, result.y_axis)
+
+            _ = self.canvas.wires.get(node.plot_label)
+            legend_string = _.wireName
+            # print(wire)
+            # legend_string = wire.wireName
+            self.plotView.axes.plot(node.x_axis, node.y_axis, label=legend_string)
         # self.plotView = MplCanvas(result)
+        self.plotView.axes.set_title(f'Transient Analysis of {self.canvas.circuitName}')
+        self.plotView.axes.set_xlabel("Time")
+        self.plotView.axes.grid(True)
+        self.plotView.axes.legend()
         self.plotView.canvas.draw()
 
         # self.plotView.update()

@@ -30,7 +30,7 @@ class ResultPlot:
 
 class SimulationMiddleware:
     class Signals(QObject):
-        simulationResult = pyqtSignal(np.ndarray)
+        simulationResult = pyqtSignal(list)
         simulationData = pyqtSignal(str)
 
     def __init__(self, circuit_name, canvas_components, canvas_wires, analysis_type, var_1, var_2, operating_temp,
@@ -183,11 +183,12 @@ class SimulationMiddleware:
             return
         try:
             print(f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])}")
-            data = f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode])} V"
+            data = f"{self.selectedNodeName} - {float(analysis.nodes[self.selectedNode]):.4f} V"
             logger.info(data)
             self.signals.simulationData.emit(data)
         except Exception as e:
-            logger.info(e)
+            print(e)
+            # logger.info(e)
             data = f"{self.selectedNodeName} - 0 V"
             logger.info(data)
 
@@ -352,13 +353,36 @@ class SimulationMiddleware:
                 pass
             try:
                 # call function here
+                plots = []
+                plot = None
                 analysis_node = self.generate_component_source_connection("Source_AC")
                 analysis = simulator.transient(step_time=step_time, end_time=end_time)
                 result_plot = ResultPlot("Transient Analysis", np.array(analysis.time),
                                          np.array((analysis[analysis_node])), "Time", "Voltage")
                 self.result_plot = result_plot
-                self.signals.simulationResult.emit(self.result_plot.x_axis)
-                return self.result_plot
+                completedNodes = []
+                for node in analysis.nodes.values():
+                    wire = self.wires.get(str(node))
+                    legend_string = wire.wireName
+                    # if node not in completedNodes:
+                    plt.plot(np.array(analysis.time), np.array(analysis[str(node)]), label=legend_string)
+                    plot = ResultPlot(str(node), np.array(analysis.time),
+                                      np.array(analysis[str(node)]), "Time", "")
+                    plots.append(plot)
+                    # completedNodes.append(node)
+                    # Adding titles and labels
+                    plt.title(f'Transient Analysis of {self.circuit_name}')
+                    plt.xlabel('Time')
+                    plt.ylabel('V')
+
+                    # Adding a legend
+                    plt.legend()
+
+                # Show the plot
+                plt.show()
+
+                self.signals.simulationResult.emit(plots)
+                return plots
             except Exception as e:
                 logger.info(e)
             pass
@@ -377,7 +401,7 @@ class SimulationMiddleware:
                 logger.info(e)
                 pass
 
-            analysis = simulator.ac(start_frequency=start_freq@u_Hz, stop_frequency=end_freq@u_Hz, variation='dec',
+            analysis = simulator.ac(start_frequency=start_freq @ u_Hz, stop_frequency=end_freq @ u_Hz, variation='dec',
                                     number_of_points=10)
             result_plot = ResultPlot("AC Analysis", np.array(analysis.time),
                                      np.array((analysis["wire-1"])), "Time", "Voltage")
