@@ -5,6 +5,7 @@ import sys
 
 import PySpice
 import PySpice.Logging.Logging as logging
+from PySpice.Plot.BodeDiagram import bode_diagram
 from PySpice.Spice.Netlist import Circuit
 
 from PySpice.Unit import *
@@ -401,13 +402,40 @@ class SimulationMiddleware:
                 logger.info(e)
                 pass
 
+            plots = []
+            plot = None
+
             analysis = simulator.ac(start_frequency=start_freq @ u_Hz, stop_frequency=end_freq @ u_Hz, variation='dec',
                                     number_of_points=10)
-            result_plot = ResultPlot("AC Analysis", np.array(analysis.time),
-                                     np.array((analysis["wire-1"])), "Time", "Voltage")
-            self.result_plot = result_plot
-            self.signals.simulationResult.emit(self.result_plot.x_axis)
-            return self.result_plot
+            # result_plot = ResultPlot("AC Analysis", np.array(analysis.time),
+            #                          np.array((analysis["wire-1"])), "Time", "Voltage")
+            # self.result_plot = result_plot
+            for node in analysis.nodes.values():
+                wire = self.wires.get(str(node))
+                legend_string = wire.wireName
+                # if node not in completedNodes:
+                plt.title(f'Bode Diagram of {self.circuit_name}')
+                fig, axes = plt.subplots(2, figsize=(20, 10))
+                self.bode_diagram2(axes=axes,
+                                   frequency=analysis.frequency,
+                                   gain=20 * np.log10(np.absolute(analysis[str(node)])),
+                                   phase=np.angle(analysis[str(node)], deg=False),
+                                   marker='-',
+                                   label=legend_string)
+                plot = ResultPlot("", analysis.frequency,
+                                  analysis[str(node)], "Time", "")
+                plots.append(plot)
+                # completedNodes.append(node)
+                # Adding titles and labels
+                # plt.xlabel('Time')
+                # plt.ylabel('V')
+
+                # Adding a legend
+                plt.legend()
+            plt.show()
+            plt.tight_layout()
+            self.signals.simulationResult.emit(plots)
+            return plots
             pass
         if self.selectedNode != "":
             try:
@@ -416,6 +444,21 @@ class SimulationMiddleware:
                 print(e)
 
         print(analysis)
+
+    def bode_diagram2(self, axes, frequency, gain, phase, marker, label):
+        ax_gain, ax_phase = axes
+        ax_gain.plot(frequency, gain, marker, label=label)
+        ax_gain.set_xscale('log')
+        ax_gain.set_ylabel('Gain (dB)')
+        ax_gain.legend()
+        ax_gain.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+        ax_phase.plot(frequency, np.degrees(phase), marker, label=label)
+        ax_phase.set_xscale('log')
+        ax_phase.set_ylabel('Phase (degrees)')
+        ax_phase.set_xlabel('Frequency (Hz)')
+        ax_phase.legend()
+        ax_phase.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     def generate_component_source_connection(self, component_type):
         logger.info("getting ac node")

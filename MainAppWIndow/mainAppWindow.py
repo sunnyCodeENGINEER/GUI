@@ -91,7 +91,8 @@ class MainWindow(QMainWindow):
         #
         if self.canvas.analysisType == "Operating Point":
             return
-
+        if self.canvas.analysisType == "AC Analysis":
+            return
         self.plotView.show()
         self.plotView.axes.clear()
         print("===================")
