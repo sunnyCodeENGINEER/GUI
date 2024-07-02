@@ -200,11 +200,12 @@ class MyGraphicsView(QGraphicsView):
                 var_1, var_2 = self.show_analysis_input_dialog(text="Start Frequency:", text2="Stop Frequency:")
                 pass
             if self.analysisType == "DC Sweep":
+                var_1, var_2 = self.show_analysis_input_dialog(text="End Value:", text2="Step Value:")
                 pass
 
             self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
                                                 var_1, var_2, 25, 25)
-            if self.analysisType == "Transient" or self.analysisType == "AC Analysis":
+            if self.analysisType == "Transient" or self.analysisType == "AC Analysis" or self.analysisType == "DC Sweep":
                 try:
                     self.simulationResult = self.circuit.run_analysis()
                     self.result_received()

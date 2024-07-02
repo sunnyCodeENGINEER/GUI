@@ -91,6 +91,19 @@ class MainWindow(QMainWindow):
         #
         if self.canvas.analysisType == "Operating Point":
             return
+
+        self.plotView.axes.clear()
+        if self.canvas.analysisType == "DC Sweep":
+            for node in result:
+                self.plotView.axes.plot(node.x_axis, node.y_axis, label=node.plot_label)
+
+            self.plotView.axes.set_title(f'DC Sweep Analysis of {self.canvas.circuitName}')
+            # self.plotView.axes.xlabel("input voltage (V)")
+            # self.plotView.axes.ylabel(f'output voltage (V)')
+            self.plotView.axes.grid(True)
+            self.plotView.axes.legend()
+            self.plotView.canvas.draw()
+            return
         if self.canvas.analysisType == "AC Analysis":
             return
         self.plotView.show()
@@ -203,6 +216,7 @@ class MainWindow(QMainWindow):
                 self.plotView.show()
 
         else:
+            self.plotView.axes.clear()
             self.plotView.hide()
 
     def on_simulation_setting(self):

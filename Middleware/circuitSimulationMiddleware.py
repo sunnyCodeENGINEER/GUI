@@ -85,6 +85,7 @@ class SimulationMiddleware:
 
         # self.test_circuit()
         try:
+
             logger.info("Extracting Components Information")
             component_ids = self.components.keys()
             for component_id in component_ids:
@@ -311,14 +312,15 @@ class SimulationMiddleware:
             analysis = simulator.operating_point()
         elif self.analysisType == "DC Sweep":
             step_time, end_value = None, None
+            wire_id = None
             try:
-                step_time = float(self.var_1)
+                step_time = float(self.var_2)
                 print(step_time)
             except Exception as e:
                 logger.info(e)
                 pass
             try:
-                end_value = float(self.var_2)
+                end_value = float(self.var_1)
                 print(end_value)
             except Exception as e:
                 logger.info(e)
@@ -328,13 +330,41 @@ class SimulationMiddleware:
                     component = self.components.get(component_id)
                     # if component.componentType.startswith("Source"):
                     if component.componentName == "Source_DC-1":
-                        # component.componentID = "SourceDC1"
-                        analysis = simulator.dc(SourceDC1=slice(0, 5, 0.5))
-                        result_plot = ResultPlot("DC Sweep Analysis", np.array(analysis.time),
-                                                 np.array((analysis["wire-1"])), "Time", "Voltage")
-                        self.result_plot = result_plot
-                        self.signals.simulationResult.emit(self.result_plot.x_axis)
-                        return self.result_plot
+                        component.componentID = "SourceDC1"
+                        if component.terminal1To.startswith("Ground"):
+                            wire_id = component.terminal2To
+                        else:
+                            wire_id = component.terminal1To
+                        analysis = simulator.dc(VSourceDC1=slice(0, end_value, step_time))
+                        # result_plot = ResultPlot("DC Sweep Analysis", np.array(analysis.time),
+                        #                          np.array((analysis["wire-1"])), "Time", "Voltage")
+                        # self.result_plot = result_plot
+                        # self.signals.simulationResult.emit(self.result_plot.x_axis)
+                        # return self.result_plot
+
+                print(analysis)
+                print(str(analysis.nodes.values()))
+                plots = []
+                plot = None
+
+                for node in analysis.nodes.values():
+                    print(str(node))
+                    wire = self.wires.get(str(node))
+                    legend_string = ""
+                    try:
+                        legend_string = wire.wireName
+                    except Exception as e:
+                        print(e)
+
+                    # plt.plot(np.array(analysis[wire_id]), np.array(analysis[str(node)]), label=legend_string)
+                    plot = ResultPlot(legend_string, np.array(analysis[wire_id]),
+                                      np.array(analysis[str(node)]), str(node), "")
+                    plots.append(plot)
+
+                plots.pop()
+
+                self.signals.simulationResult.emit(plots)
+                return plots
             except Exception as e:
                 print(e)
 
@@ -361,7 +391,7 @@ class SimulationMiddleware:
                 result_plot = ResultPlot("Transient Analysis", np.array(analysis.time),
                                          np.array((analysis[analysis_node])), "Time", "Voltage")
                 self.result_plot = result_plot
-                completedNodes = []
+                # completedNodes = []
                 for node in analysis.nodes.values():
                     wire = self.wires.get(str(node))
                     legend_string = wire.wireName
@@ -380,7 +410,7 @@ class SimulationMiddleware:
                     plt.legend()
 
                 # Show the plot
-                plt.show()
+                # plt.show()
 
                 self.signals.simulationResult.emit(plots)
                 return plots
@@ -436,7 +466,7 @@ class SimulationMiddleware:
             plt.tight_layout()
             self.signals.simulationResult.emit(plots)
             return plots
-            pass
+
         if self.selectedNode != "":
             try:
                 self.show_specific_data(analysis)
