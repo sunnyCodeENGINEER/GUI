@@ -1,3 +1,4 @@
+import math
 import typing
 
 from PyQt6.QtCore import Qt, QPoint, QRectF, QPointF, pyqtSignal
@@ -16,6 +17,7 @@ class Wire(QGraphicsItem):
         super().__init__()
         self.wireID = ""
         self.wireName = ""
+        self.wireValue = 0.0
         self.wireColour = color
         self.wireColourText = color_text
         self.start = None  # where wire starts from
@@ -64,6 +66,10 @@ class Wire(QGraphicsItem):
         self.wireColour = color
         self.wireColourText = text
 
+    def set_value(self, value):
+        self.wireValue = value
+        # self.update()
+
     def connect_signals(self):
         self.signals.wireSelected.emit(self.wireID)
 
@@ -76,6 +82,11 @@ class Wire(QGraphicsItem):
         pen.setWidth(20)
         painter.setPen(pen)
 
+        # draw selection box
+        if self.isSelected():
+            painter.setPen(QPen(Qt.GlobalColor.red, 0.3, Qt.PenStyle.DashLine))
+            painter.drawRect(self.boundingRect())
+
         if len(self.points) >= 2:
             # Define a pen for drawing the lines
             pen = QPen(self.wireColour)
@@ -87,6 +98,29 @@ class Wire(QGraphicsItem):
                 start_point = self.points[i]
                 end_point = self.points[i + 1]
                 painter.drawLine(start_point, end_point)
+
+                # Calculate the angle in radians
+                dx = start_point.x() - end_point.x()
+                dy = start_point.y() - end_point.y()
+                angle_radians = math.atan2(dy, dx)
+
+                # Convert the angle to degrees
+                angle_degrees = -math.degrees(angle_radians)
+
+                # Save the current painter state
+                # painter.save()
+
+                # Translate the painter to the starting point
+                painter.translate(start_point + QPointF(5, 10))
+
+                # Rotate the painter by the calculated angle
+                painter.rotate(angle_degrees)
+
+                # Draw the text
+                value = ""
+                if self.wireValue != 0:
+                    value = f": {value:.f} V"
+                painter.drawText(0, 0, f"{self.wireName}{value}")
 
         # draw selection box
         if self.isSelected():

@@ -310,6 +310,9 @@ class SimulationMiddleware:
         analysis = simulator.operating_point()
         if self.analysisType == "Operating Point":
             analysis = simulator.operating_point()
+            values = []
+            # return [analysis]
+
         elif self.analysisType == "DC Sweep":
             step_time, end_value = None, None
             wire_id = None
@@ -336,11 +339,6 @@ class SimulationMiddleware:
                         else:
                             wire_id = component.terminal1To
                         analysis = simulator.dc(VSourceDC1=slice(0, end_value, step_time))
-                        # result_plot = ResultPlot("DC Sweep Analysis", np.array(analysis.time),
-                        #                          np.array((analysis["wire-1"])), "Time", "Voltage")
-                        # self.result_plot = result_plot
-                        # self.signals.simulationResult.emit(self.result_plot.x_axis)
-                        # return self.result_plot
 
                 print(analysis)
                 print(str(analysis.nodes.values()))

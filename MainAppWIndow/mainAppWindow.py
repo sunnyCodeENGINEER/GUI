@@ -90,6 +90,18 @@ class MainWindow(QMainWindow):
         # self.plotView.plot(result.x_axis, result.y_axis)
         #
         if self.canvas.analysisType == "Operating Point":
+            _ = result[0]
+            for node in _.nodes.values():
+                wire = self.canvas.wires.get(str(node))
+                try:
+                    print(node)
+                    print(wire.wireValue)
+                    # wire.set_value(float(node))
+                    print("======")
+                    print(wire.wireValue)
+                except Exception as e:
+                    print(e)
+                # wire.redraw()
             return
 
         self.plotView.axes.clear()

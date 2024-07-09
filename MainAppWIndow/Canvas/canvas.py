@@ -205,7 +205,9 @@ class MyGraphicsView(QGraphicsView):
 
             self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
                                                 var_1, var_2, 25, 25)
-            if self.analysisType == "Transient" or self.analysisType == "AC Analysis" or self.analysisType == "DC Sweep":
+            if self.analysisType == "Transient" or self.analysisType == "AC Analysis" or self.analysisType == "DC Sweep"\
+                    or self.analysisType == "Operating Point" \
+                                            "":
                 try:
                     self.simulationResult = self.circuit.run_analysis()
                     self.result_received()
