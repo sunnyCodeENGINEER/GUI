@@ -15,6 +15,8 @@ from Components.logger import qt_log_handler
 from Middleware.circuitSimulationMiddleware import ResultPlot
 from Middleware.resultPlot import MplCanvas
 
+import matplotlib.pyplot as plt
+
 
 class MainWindow(QMainWindow):
     class Signals(QObject):
@@ -104,6 +106,22 @@ class MainWindow(QMainWindow):
                 # wire.redraw()
             return
 
+        if self.canvas.analysisType == "AC Analysis":
+            # return
+            for node in result:
+                wire = self.canvas.wires.get(node.plot_label)
+                legend_string = wire.wireName
+                plt.title(f'Bode Diagram of {self.canvas.circuitName}')
+                fig, axes = plt.subplots(2, figsize=(20, 10))
+                self.bode_diagram2(axes=axes,
+                                   frequency=node.x_axis,
+                                   gain=20 * np.log10(np.absolute(node.y_axis)),
+                                   phase=np.angle(node.y_axis, deg=False),
+                                   marker='-',
+                                   label=legend_string)
+                pass
+            return
+
         self.plotView.axes.clear()
         if self.canvas.analysisType == "DC Sweep":
             for node in result:
@@ -116,8 +134,7 @@ class MainWindow(QMainWindow):
             self.plotView.axes.legend()
             self.plotView.canvas.draw()
             return
-        if self.canvas.analysisType == "AC Analysis":
-            return
+
         self.plotView.show()
         self.plotView.axes.clear()
         print("===================")
@@ -139,6 +156,21 @@ class MainWindow(QMainWindow):
         # self.plotView.update()
         # self.update()
         pass
+
+    def bode_diagram2(self, axes, frequency, gain, phase, marker, label):
+        ax_gain, ax_phase = axes
+        ax_gain.plot(frequency, gain, marker, label=label)
+        ax_gain.set_xscale('log')
+        ax_gain.set_ylabel('Gain (dB)')
+        ax_gain.legend()
+        ax_gain.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+        ax_phase.plot(frequency, np.degrees(phase), marker, label=label)
+        ax_phase.set_xscale('log')
+        ax_phase.set_ylabel('Phase (degrees)')
+        ax_phase.set_xlabel('Frequency (Hz)')
+        ax_phase.legend()
+        ax_phase.grid(True, which='both', linestyle='--', linewidth=0.5)
 
     def _create_toolbar(self):
         """Create a toolbar for the main window"""

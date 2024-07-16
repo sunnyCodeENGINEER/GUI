@@ -450,7 +450,7 @@ class SimulationMiddleware:
                                    phase=np.angle(analysis[str(node)], deg=False),
                                    marker='-',
                                    label=legend_string)
-                plot = ResultPlot("", analysis.frequency,
+                plot = ResultPlot(str(node), analysis.frequency,
                                   analysis[str(node)], "Time", "")
                 plots.append(plot)
                 # completedNodes.append(node)

@@ -120,7 +120,7 @@ class Wire(QGraphicsItem):
                 value = ""
                 if self.wireValue != 0:
                     value = f": {value:.f} V"
-                painter.drawText(0, 0, f"{self.wireName}{value}")
+                # painter.drawText(0, 0, f"{self.wireName}{value}")
 
         # draw selection box
         if self.isSelected():
