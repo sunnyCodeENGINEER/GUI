@@ -196,7 +196,6 @@ class MainWindow(QMainWindow):
 
     def on_canvas_wire_deselect(self):
         self.attributesPane.on_canvas_wire_deselect()
-        # print("Thesis Papa")
 
     def on_component_select(self, component):
         self.canvas.add_component(component)

@@ -197,10 +197,11 @@ class MyGraphicsView(QGraphicsView):
                 var_1, var_2 = self.show_analysis_input_dialog()
                 pass
             if self.analysisType == "AC Analysis":
-                var_1, var_2 = self.show_analysis_input_dialog(text="Start Frequency:", text2="Stop Frequency:")
+                var_1, var_2 = self.show_analysis_input_dialog(text="Start Frequency (Hz):", text2="Stop Frequency ("
+                                                                                                   "uHz):")
                 pass
             if self.analysisType == "DC Sweep":
-                var_1, var_2 = self.show_analysis_input_dialog(text="End Value:", text2="Step Value:")
+                var_1, var_2 = self.show_analysis_input_dialog(text="End Value (V):", text2="Step Value (V):")
                 pass
 
             self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
@@ -314,7 +315,9 @@ class MyGraphicsView(QGraphicsView):
                                   (origin_wire.points[0].y() + origin_wire.points[1].y()) / 2)
                           ]
                 self.currentWire = Wire(Qt.GlobalColor.darkGreen, "darkGreen", points=points)
-                self.currentWire.wireName = self.show_input_dialog()
+                # self.currentWire.wireName = self.show_input_dialog()
+                unique_count = self.generate_unique_wire_count()
+                self.currentWire.wireName = f"wire-{unique_count}"
                 if self.currentWire.wireName == "":
                     self.clickedTerminals.clear()
                     self.terminalPoint.clear()
@@ -362,7 +365,9 @@ class MyGraphicsView(QGraphicsView):
                           ]
 
                 self.currentWire = Wire(Qt.GlobalColor.darkGreen, "darkGreen", points=points)
-                self.currentWire.wireName = self.show_input_dialog()
+                unique_count = self.generate_unique_wire_count()
+                # self.currentWire.wireName = self.show_input_dialog()
+                self.currentWire.wireName = f"wire-{unique_count}"
                 if self.currentWire.wireName == "":
                     self.clickedTerminals.clear()
                     self.terminalPoint.clear()
@@ -419,7 +424,8 @@ class MyGraphicsView(QGraphicsView):
                 self.currentWire = Wire(Qt.GlobalColor.darkGreen, "darkGreen")
                 unique_count = self.generate_unique_wire_count()
                 self.currentWire.wireID = f"wire-{unique_count}"
-                self.currentWire.wireName = self.show_input_dialog()
+                # self.currentWire.wireName = self.show_input_dialog()
+                self.currentWire.wireName = f"wire-{unique_count}"
                 if self.currentWire.wireName == "":
                     self.clickedTerminals.clear()
                     self.terminalPoint.clear()
@@ -490,7 +496,7 @@ class MyGraphicsView(QGraphicsView):
         else:
             return None, None
 
-    def show_analysis_input_dialog(self, title='Name Wire', text='Step Time:', text2='End Time:'):
+    def show_analysis_input_dialog(self, title='Name Wire', text='Step Time (s):', text2='End Time (s):'):
         dialog = AnalysisInputDialog(text=text, text2=text2)
         var_1, var_2 = dialog.getInputs()
 
