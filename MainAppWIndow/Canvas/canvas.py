@@ -439,6 +439,7 @@ class MyGraphicsView(QGraphicsView):
                     if component_id.startswith("Ground"):
                         unique_count = self.generate_unique_ground_wire_count()
                         self.currentWire.wireID = f"ground-{unique_count}"
+                        self.currentWire.wireName = f"ground-{unique_count}"
 
                 try:
                     self._connect_wire_signals(self.currentWire)
