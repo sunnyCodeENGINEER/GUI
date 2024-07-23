@@ -492,7 +492,7 @@ class MyGraphicsView(QGraphicsView):
 
         if wire_name and combo_value:
 
-            QMessageBox.information(self, 'Message', f'Wire {wire_name} added with {combo_value}.')
+            QMessageBox.information(self, 'Message', f'Circuit {wire_name} added with {combo_value}.')
             return wire_name, combo_value
         else:
             return None, None
