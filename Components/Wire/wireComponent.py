@@ -103,14 +103,22 @@ class Wire(QGraphicsItem):
                 dx = start_point.x() - end_point.x()
                 dy = start_point.y() - end_point.y()
                 angle_radians = math.atan2(dy, dx)
+                # angle_radians = math.tan(angle_radians)
 
                 # Convert the angle to degrees
-                angle_degrees = -math.degrees(angle_radians)
+                # angle_degrees = -math.degrees(angle_radians)
+                angle_degrees = math.degrees(angle_radians - (2 * math.pi / 2))
 
                 # Save the current painter state
                 # painter.save()
 
                 # Translate the painter to the starting point
+                point = start_point
+                print(angle_degrees)
+                if angle_degrees >= 120:
+                    angle_degrees = angle_degrees - 180
+                print(angle_degrees)
+
                 painter.translate(start_point + QPointF(5, 10))
 
                 # Rotate the painter by the calculated angle
@@ -119,8 +127,10 @@ class Wire(QGraphicsItem):
                 # Draw the text
                 value = ""
                 if self.wireValue != 0:
-                    value = f": {value:.f} V"
-                # painter.drawText(0, 0, f"{self.wireName}{value}")
+                    value = ": {:.4} V".format(self.wireValue)
+                painter.drawText(0, 0, f"{self.wireName}{value}")
+
+                painter.rotate(0.00)
 
         # draw selection box
         if self.isSelected():

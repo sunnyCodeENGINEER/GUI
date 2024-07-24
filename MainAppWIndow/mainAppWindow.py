@@ -93,16 +93,20 @@ class MainWindow(QMainWindow):
         #
         if self.canvas.analysisType == "Operating Point":
             _ = result[0]
-            for node in _.nodes.values():
-                wire = self.canvas.wires.get(str(node))
-                try:
-                    print(node)
-                    print(wire.wireValue)
-                    # wire.set_value(float(node))
-                    print("======")
-                    print(wire.wireValue)
-                except Exception as e:
-                    print(e)
+            self.canvas.operating_point_result(_)
+            # for node in _.nodes.values():
+            #     wire = self.canvas.wires.get(str(node))
+            #     try:
+            #         print(node)
+            #         print(wire.wireValue)
+            #         # wire.set_value(float(node))
+            #         # wire.wireValue = float(node)
+            #         print("======")
+            #
+            #         # print(wire.wireValue)
+            #         # wire.redraw()
+            #     except Exception as e:
+            #         print(e)
                 # wire.redraw()
             return
 
@@ -130,6 +134,8 @@ class MainWindow(QMainWindow):
             self.plotView.axes.set_title(f'DC Sweep Analysis of {self.canvas.circuitName}')
             # self.plotView.axes.xlabel("input voltage (V)")
             # self.plotView.axes.ylabel(f'output voltage (V)')
+            # self.plotView.xlabel("input voltage (V)")
+            # self.plotView.ylabel("output voltage (V)")
             self.plotView.axes.grid(True)
             self.plotView.axes.legend()
             self.plotView.canvas.draw()
@@ -148,7 +154,10 @@ class MainWindow(QMainWindow):
             self.plotView.axes.plot(node.x_axis, node.y_axis, label=legend_string)
         # self.plotView = MplCanvas(result)
         self.plotView.axes.set_title(f'Transient Analysis of {self.canvas.circuitName}')
-        self.plotView.axes.set_xlabel("Time")
+        # self.plotView.axes.set_xlabel("Voltage")
+        # self.plotView.axes.set_ylabel("Time")
+        # self.plotView.xlabel("Voltage")
+        # self.plotView.ylabel("Time")
         self.plotView.axes.grid(True)
         self.plotView.axes.legend()
         self.plotView.canvas.draw()
@@ -191,8 +200,6 @@ class MainWindow(QMainWindow):
 
     def on_canvas_wire_select(self, wire):
         self.attributesPane.on_canvas_wire_select(wire)
-
-        # print("Thesis Maame")
 
     def on_canvas_wire_deselect(self):
         self.attributesPane.on_canvas_wire_deselect()

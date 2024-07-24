@@ -185,6 +185,22 @@ class MyGraphicsView(QGraphicsView):
         self.circuit.signals.simulationData.connect(self.data_received)
         # self.circuit.signals.simulationResult.connect(self.result_received)
 
+    def operating_point_result(self, nodes):
+        for node in nodes.nodes.values():
+            self.currentWire = self.wires.get(str(node))
+            try:
+                print(node)
+                print(self.currentWire.wireValue)
+                # self.currentWire.set_value(float(node))
+                self.currentWire.wireValue = float(node)
+                print("======")
+                print(self.currentWire.wireValue)
+                self.currentWire.redraw()
+            except Exception as e:
+                print(e)
+            # wire.redraw()
+        pass
+
     def simulate(self):
         if self.isSimulating:
 

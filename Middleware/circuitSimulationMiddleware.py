@@ -472,6 +472,7 @@ class SimulationMiddleware:
                 print(e)
 
         print(analysis)
+        return [analysis]
 
     def bode_diagram2(self, axes, frequency, gain, phase, marker, label):
         ax_gain, ax_phase = axes
