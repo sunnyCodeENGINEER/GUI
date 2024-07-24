@@ -73,16 +73,16 @@ class SymbolWithThreeTerminals(QGraphicsItem):
         body_w = self.width - (2 * self.terminalLength)
 
         # Get the 4 corners of the rectangle in the resistor
-        point_a = QPointF(self.terminalLength, 0)
-        point_b = QPointF(self.terminalLength + body_w, 0)
-        point_c = QPointF(point_b.x(), point_b.y() + self.height - (2 * self.terminalLength))
-        point_d = QPointF(point_a.x(), point_a.y() + self.height - (2 * self.terminalLength))
-
-        # Draw the edges of the rectangle in the resistor
-        painter.drawLine(point_a, point_b)
-        painter.drawLine(point_b, point_c)
-        painter.drawLine(point_c, point_d)
-        painter.drawLine(point_d, point_a)
+        # point_a = QPointF(self.terminalLength, 0)
+        # point_b = QPointF(self.terminalLength + body_w, 0)
+        # point_c = QPointF(point_b.x(), point_b.y() + self.height - (2 * self.terminalLength))
+        # point_d = QPointF(point_a.x(), point_a.y() + self.height - (2 * self.terminalLength))
+        #
+        # # Draw the edges of the rectangle in the resistor
+        # painter.drawLine(point_a, point_b)
+        # painter.drawLine(point_b, point_c)
+        # painter.drawLine(point_c, point_d)
+        # painter.drawLine(point_d, point_a)
 
         t1_a = QPointF(0, self.height // 2)
         t1_b = QPointF(self.terminalLength, self.height // 2)
