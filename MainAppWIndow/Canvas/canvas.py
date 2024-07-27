@@ -201,6 +201,27 @@ class MyGraphicsView(QGraphicsView):
             # wire.redraw()
         pass
 
+    def shortest_wire_path(self, point1, point2):
+        o = [point1.x(), point2.x()]
+        p = [point1.y(), point2.y()]
+        _ = point1
+        points = [_]
+        for component_id in self.canvasComponents.keys():
+            component = self.canvasComponents.get(component_id)
+            if max(o) <= component.symbol.scenePos().x() >= min(o):
+                point1 = QPointF(component.symbol.scenePos().x() - 50.0, point1.y())
+                points.append(point1)
+            else:
+                if max(p) <= component.symbol.scenePos().y() >= min(p):
+                    point1 = QPointF(point1.x(), component.symbol.scenePos().x() - 50.0)
+                    points.append(point1)
+                else:
+
+                    pass
+
+        points.append(point2)
+        pass
+
     def simulate(self):
         if self.isSimulating:
 
@@ -222,7 +243,7 @@ class MyGraphicsView(QGraphicsView):
 
             self.circuit = SimulationMiddleware(self.circuitName, self.canvasComponents, self.wires, self.analysisType,
                                                 var_1, var_2, 25, 25)
-            if self.analysisType == "Transient" or self.analysisType == "AC Analysis" or self.analysisType == "DC Sweep"\
+            if self.analysisType == "Transient" or self.analysisType == "AC Analysis" or self.analysisType == "DC Sweep" \
                     or self.analysisType == "Operating Point" \
                                             "":
                 try:

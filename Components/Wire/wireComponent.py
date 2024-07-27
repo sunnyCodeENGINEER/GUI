@@ -94,35 +94,71 @@ class Wire(QGraphicsItem):
             painter.setPen(pen)
 
             # Draw lines connecting the points
-            for i in range(len(self.points) - 1):
-                start_point = self.points[i]
-                end_point = self.points[i + 1]
-                painter.drawLine(start_point, end_point)
+            # for i in range(len(self.points) - 1):
+            #     start_point = self.points[i]
+            #     end_point = self.points[i + 1]
+            #     painter.drawLine(start_point, end_point)
+            #
+            #     # Calculate the angle in radians
+            #     dx = start_point.x() - end_point.x()
+            #     dy = start_point.y() - end_point.y()
+            #     angle_radians = math.atan2(dy, dx)
+            #     # angle_radians = math.tan(angle_radians)
+            #
+            #     # Convert the angle to degrees
+            #     # angle_degrees = -math.degrees(angle_radians)
+            #     angle_degrees = math.degrees(angle_radians - (2 * math.pi / 2))
+            #
+            #     # Save the current painter state
+            #     # painter.save()
+            #
+            #     # Translate the painter to the starting point
+            #     point = start_point
+            #     print(angle_degrees)
+            #     if angle_degrees >= 120:
+            #         angle_degrees = angle_degrees - 180
+            #     print(angle_degrees)
+            #
+            #     painter.translate(start_point + QPointF(5, 10))
+            #
+            #     # Rotate the painter by the calculated angle
+            #     painter.rotate(angle_degrees)
+            #
+            #     # Draw the text
+            #     value = ""
+            #     if self.wireValue != 0:
+            #         value = ": {:.4} V".format(self.wireValue)
+            #     painter.drawText(0, 0, f"{self.wireName}{value}")
+            #
+            #     painter.rotate(0.00)
 
-                # Calculate the angle in radians
-                dx = start_point.x() - end_point.x()
-                dy = start_point.y() - end_point.y()
-                angle_radians = math.atan2(dy, dx)
-                # angle_radians = math.tan(angle_radians)
+            # test new algorithm
+            if self.points[0].x() - self.points[1].x() < -5 or self.points[0].x() - self.points[1].x() > 5:
+                mid_point = QPointF(self.points[1].x(), self.points[0].y())
+                print(mid_point)
+                print(self.points)
+                painter.drawLine(self.points[0], mid_point)
+                painter.drawLine(mid_point, self.points[1])
+                # painter.translate(self.points[1] + QPointF(-5, -10))
+                # Calculate distances from midpoint
+                distance_0 = (self.points[0] - mid_point).manhattanLength()
+                distance_1 = (self.points[1] - mid_point).manhattanLength()
 
-                # Convert the angle to degrees
-                # angle_degrees = -math.degrees(angle_radians)
-                angle_degrees = math.degrees(angle_radians - (2 * math.pi / 2))
+                if distance_0 > distance_1:
+                    text_position = self.points[0]
+                    offset = QPointF(-5, -10)
+                    painter.translate(text_position + offset)
+                else:
+                    text_position = self.points[1]
+                    offset = QPointF(-5, -10)
+                    # Rotate the painter by the calculated angle
+                    painter.translate(text_position + offset)
+                    painter.rotate(-90.00)
 
-                # Save the current painter state
-                # painter.save()
-
-                # Translate the painter to the starting point
-                point = start_point
-                print(angle_degrees)
-                if angle_degrees >= 120:
-                    angle_degrees = angle_degrees - 180
-                print(angle_degrees)
-
-                painter.translate(start_point + QPointF(5, 10))
-
+                # painter.translate(text_position + offset)
+                # painter.rotate(-90.00)
                 # Rotate the painter by the calculated angle
-                painter.rotate(angle_degrees)
+                # painter.rotate(-90.00)
 
                 # Draw the text
                 value = ""
@@ -130,7 +166,58 @@ class Wire(QGraphicsItem):
                     value = ": {:.4} V".format(self.wireValue)
                 painter.drawText(0, 0, f"{self.wireName}{value}")
 
-                painter.rotate(0.00)
+                # Rotate back to the original orientation
+                painter.rotate(90.00)
+
+            # elif self.points[0].y() - self.points[1].y() < -5 or self.points[0].y() - self.points[1].y() > 5:
+            #     mid_point = QPointF(self.points[0].x(), self.points[1].y())
+            #     painter.drawLine(self.points[0], mid_point)
+            #     painter.drawLine(mid_point, self.points[1])
+            #     painter.translate(self.points[1] + QPointF(5, 10))
+            #
+            #     # Draw the text
+            #     value = ""
+            #     if self.wireValue != 0:
+            #         value = ": {:.4} V".format(self.wireValue)
+            #     painter.drawText(0, 0, f"{self.wireName}{value}")
+
+            # Ensure the painter is in its original state after drawing
+            painter.rotate(0.00)
+
+            # # test new algorithm
+            # if self.points[0].x() - self.points[1].x() < -5 or self.points[0].x() - self.points[1].x() > 5:
+            #     mid_point = QPointF(self.points[1].x(), self.points[0].y())
+            #     print(mid_point)
+            #     print(self.points)
+            #     painter.drawLine(self.points[0], mid_point)
+            #     painter.drawLine(mid_point, self.points[1])
+            #     painter.translate(self.points[1] + QPointF(-5, -10))
+            #
+            #     # Rotate the painter by the calculated angle
+            #     painter.rotate(-90.00)
+            #
+            #     # Draw the text
+            #     value = ""
+            #     if self.wireValue != 0:
+            #         value = ": {:.4} V".format(self.wireValue)
+            #     painter.drawText(0, 0, f"{self.wireName}{value}")
+            #
+            #     painter.rotate(0.00)
+            #
+            # elif self.points[0].y() - self.points[1].y() < -5 or self.points[0].y() - self.points[1].y():
+            #     mid_point = QPointF(self.points[0].x(), self.points[1].y())
+            #     painter.drawLine(self.points[0], mid_point)
+            #     painter.translate(self.points[1] + QPointF(5, 10))
+            #
+            #     # Draw the text
+            #     value = ""
+            #     if self.wireValue != 0:
+            #         value = ": {:.4} V".format(self.wireValue)
+            #     painter.drawText(0, 0, f"{self.wireName}{value}")
+            #
+            #     painter.rotate(0.00)
+            #     painter.drawLine(mid_point, self.points[1])
+
 
         # draw selection box
         if self.isSelected():
