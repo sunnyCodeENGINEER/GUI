@@ -90,9 +90,14 @@ class Wire(QGraphicsItem):
         if len(self.points) >= 2:
             # Define a pen for drawing the lines
             pen = QPen(self.wireColour)
-            pen.setWidth(2)
+            pen.setWidth(5)
             painter.setPen(pen)
 
+            painter.drawPoint(self.points[0])
+            painter.drawPoint(self.points[1])
+
+            pen.setWidth(2)
+            painter.setPen(pen)
             # Draw lines connecting the points
             # for i in range(len(self.points) - 1):
             #     start_point = self.points[i]
@@ -132,33 +137,47 @@ class Wire(QGraphicsItem):
             #
             #     painter.rotate(0.00)
 
-            # test new algorithm
+            # Test new algorithm
             if self.points[0].x() - self.points[1].x() < -5 or self.points[0].x() - self.points[1].x() > 5:
-                mid_point = QPointF(self.points[1].x(), self.points[0].y())
+                point1 = None
+                point2 = None
+                if self.points[1].y() > self.points[0].y():
+                    point1 = self.points[0] + QPointF(0, 35)
+                    point2 = self.points[1] - QPointF(0, 35)
+                    if self.points[1].y() - self.points[0].y() < 35 * 2:
+                        point2 = self.points[1] + QPointF(0, 35 - (self.points[1].y() - self.points[0].y()))
+                else:
+                    # point1 = self.points[0] - QPointF(0, 35)
+                    # point2 = self.points[1] + QPointF(0, 35)
+                    # if self.points[1].y() - self.points[0].y() > 35 * 2:
+                    #     point2 = self.points[1] + QPointF(0, -35 + (self.points[1].y() - self.points[0].y()))
+                    point1 = self.points[0] - QPointF(0, 35)
+                    point2 = self.points[1] + QPointF(0, 35)
+                    if self.points[0].y() - self.points[1].y() < 70:  # 35 * 2
+                        point2 = self.points[1] + QPointF(0, -35 + (self.points[0].y() - self.points[1].y()))
+
+                mid_point = QPointF(self.points[1].x(), point1.y())
                 print(mid_point)
                 print(self.points)
-                painter.drawLine(self.points[0], mid_point)
-                painter.drawLine(mid_point, self.points[1])
-                # painter.translate(self.points[1] + QPointF(-5, -10))
+
+                painter.drawLine(self.points[0], point1)
+                painter.drawLine(point1, mid_point)
+                painter.drawLine(mid_point, point2)
+                painter.drawLine(point2, self.points[1])
+
                 # Calculate distances from midpoint
                 distance_0 = (self.points[0] - mid_point).manhattanLength()
                 distance_1 = (self.points[1] - mid_point).manhattanLength()
 
                 if distance_0 > distance_1:
                     text_position = self.points[0]
-                    offset = QPointF(-5, -10)
+                    offset = QPointF(5, -10)
                     painter.translate(text_position + offset)
                 else:
-                    text_position = self.points[1]
-                    offset = QPointF(-5, -10)
-                    # Rotate the painter by the calculated angle
+                    text_position = point2
+                    offset = QPointF(-5, 10)
                     painter.translate(text_position + offset)
                     painter.rotate(-90.00)
-
-                # painter.translate(text_position + offset)
-                # painter.rotate(-90.00)
-                # Rotate the painter by the calculated angle
-                # painter.rotate(-90.00)
 
                 # Draw the text
                 value = ""
@@ -166,8 +185,59 @@ class Wire(QGraphicsItem):
                     value = ": {:.4} V".format(self.wireValue)
                 painter.drawText(0, 0, f"{self.wireName}{value}")
 
-                # Rotate back to the original orientation
-                painter.rotate(90.00)
+                # Rotate back to the original orientation if rotated
+                if distance_0 <= distance_1:
+                    painter.rotate(90.00)
+
+                # Translate back to the original position
+                painter.translate(-(text_position + offset))
+
+            # test new algorithm
+            # if self.points[0].x() - self.points[1].x() < -5 or self.points[0].x() - self.points[1].x() > 5:
+            #     point1 = None
+            #     point2 = None
+            #     if self.points[1].y() > self.points[0].y():
+            #         point1 = self.points[0] + QPointF(0, 35)
+            #         point2 = self.points[1] - QPointF(0, 35)
+            #     else:
+            #         point1 = self.points[0] - QPointF(0, 35)
+            #         point2 = self.points[1] + QPointF(0, 35)
+            #     mid_point = QPointF(self.points[1].x(), point1.y())
+            #     print(mid_point)
+            #     print(self.points)
+            #     painter.drawLine(self.points[0], point1)
+            #     painter.drawLine(point1, mid_point)
+            #     painter.drawLine(mid_point, point2)
+            #     painter.drawLine(point2, self.points[1])
+            #     # painter.translate(self.points[1] + QPointF(-5, -10))
+            #     # Calculate distances from midpoint
+            #     distance_0 = (self.points[0] - mid_point).manhattanLength()
+            #     distance_1 = (self.points[1] - mid_point).manhattanLength()
+            #
+            #     if distance_0 > distance_1:
+            #         text_position = self.points[0]
+            #         offset = QPointF(-5, -10)
+            #         painter.translate(text_position + offset)
+            #     else:
+            #         text_position = point2
+            #         offset = QPointF(-5, 10)
+            #         # Rotate the painter by the calculated angle
+            #         painter.translate(text_position + offset)
+            #         painter.rotate(-90.00)
+            #
+            #     # painter.translate(text_position + offset)
+            #     # painter.rotate(-90.00)
+            #     # Rotate the painter by the calculated angle
+            #     # painter.rotate(-90.00)
+            #
+            #     # Draw the text
+            #     value = ""
+            #     if self.wireValue != 0:
+            #         value = ": {:.4} V".format(self.wireValue)
+            #     painter.drawText(0, 0, f"{self.wireName}{value}")
+            #
+            #     # Rotate back to the original orientation
+            #     painter.rotate(90.00)
 
             # elif self.points[0].y() - self.points[1].y() < -5 or self.points[0].y() - self.points[1].y() > 5:
             #     mid_point = QPointF(self.points[0].x(), self.points[1].y())
@@ -217,7 +287,6 @@ class Wire(QGraphicsItem):
             #
             #     painter.rotate(0.00)
             #     painter.drawLine(mid_point, self.points[1])
-
 
         # draw selection box
         if self.isSelected():
@@ -273,10 +342,10 @@ class Wire(QGraphicsItem):
 
     def calculate_line_bounding_rect(self, point1, point2):
         # Calculate minimum and maximum coordinates
-        min_x = min(point1.x() - 1, point2.x() - 1)
-        max_x = max(point1.x() + 1, point2.x() + 1)
-        min_y = min(point1.y() - 1, point2.y() - 1)
-        max_y = max(point1.y() + 1, point2.y() + 1)
+        min_x = min(point1.x() - 2, point2.x() - 2)
+        max_x = max(point1.x() + 2, point2.x() + 2)
+        min_y = min(point1.y() - 2, point2.y() - 2)
+        max_y = max(point1.y() + 2, point2.y() + 2)
 
         return QRectF(min_x, min_y, max_x - min_x, max_y - min_y)
 

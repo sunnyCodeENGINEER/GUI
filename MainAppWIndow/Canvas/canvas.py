@@ -351,6 +351,21 @@ class MyGraphicsView(QGraphicsView):
                           QPointF((origin_wire.points[0].x() + origin_wire.points[1].x()) / 2,
                                   (origin_wire.points[0].y() + origin_wire.points[1].y()) / 2)
                           ]
+                # new logic
+                distance_x = (origin_wire.points[0].x() - origin_wire.points[1].x())
+                distance_y = (origin_wire.points[0].y() - origin_wire.points[1].y())
+
+                if distance_x > distance_y:
+                    points = [self.terminalPoint[-1] + component.symbol.scenePos(),
+                              QPointF((origin_wire.points[0].x() + origin_wire.points[1].x()) / 2,
+                                      (origin_wire.points[0].y()) + 35)
+                              ]
+                else:
+                    points = [self.terminalPoint[-1] + component.symbol.scenePos(),
+                              QPointF((origin_wire.points[0].x() + origin_wire.points[1].x()) / 2,
+                                      (origin_wire.points[0].y()) - 35)
+                              ]
+
                 self.currentWire = Wire(Qt.GlobalColor.darkGreen, "darkGreen", points=points)
                 # self.currentWire.wireName = self.show_input_dialog()
                 unique_count = self.generate_unique_wire_count()
