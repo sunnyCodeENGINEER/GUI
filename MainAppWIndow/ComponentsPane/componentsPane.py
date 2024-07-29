@@ -196,7 +196,7 @@ class ComponentsPane(QtWidgets.QWidget):
 
         self.searchBox = QtWidgets.QLineEdit()
         self.searchBox.setPlaceholderText("Search component or category")
-        self.layout.addWidget(self.searchBox)
+        # self.layout.addWidget(self.searchBox)
 
         self.componentCategory = QtWidgets.QComboBox()
         self.componentCategory.setPlaceholderText("Choose a component category")

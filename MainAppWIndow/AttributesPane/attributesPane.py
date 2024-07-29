@@ -376,7 +376,7 @@ class AttributesPane(QtWidgets.QWidget):
         attribute1_label = QLabel("Frequency:")
         self.attribute1 = QLineEdit(self)
         self.attribute1.setText(self.component.frequency)
-        attribute1_unit = QLabel(f"{self.unit_combobox.currentText()}")
+        attribute1_unit = QLabel(f"Hz")
         attribute1_hbox = QHBoxLayout()
         attribute1_hbox.addWidget(attribute1_label)
         attribute1_hbox.addWidget(self.attribute1)

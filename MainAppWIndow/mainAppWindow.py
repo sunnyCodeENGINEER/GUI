@@ -239,7 +239,8 @@ class MainWindow(QMainWindow):
     def _create_and_add_wire_tool_action(self):
         """Create a wire tool action and add it to the toolbar"""
         # adding wire tool action to the toolbar
-        wire_tool = QAction(QIcon("../Assets/wire-tool-icon.png"), "Wire", self)
+        # wire_tool = QAction(QIcon("../Assets/wire-tool-icon.png"), "Wire", self)
+        wire_tool = QAction("Wire", self)
         wire_tool.setStatusTip("Wire")
         wire_tool.triggered.connect(self._on_wire_tool_click)
         wire_tool.setCheckable(True)
